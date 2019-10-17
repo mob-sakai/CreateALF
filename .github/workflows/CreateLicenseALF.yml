@@ -65,6 +65,7 @@ jobs:
 
           console.log( 'uploadReleaseAsset')
           result = await github.repos.uploadReleaseAsset({file, headers, name, url:result.data.upload_url})
+          console.dir( result)
 
           console.log( 'createComment')
           await github.issues.createComment({...context.issue, body: `👋 Thanks for reporting!\n${result.data.download_url}`})

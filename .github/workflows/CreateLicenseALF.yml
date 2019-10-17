@@ -36,7 +36,7 @@ jobs:
       with:
         github-token: ${{ github.token }}
         script: |
-          # console.dir( context )
+          // console.dir( context )
 
           const tag = context.payload.issue.title
           const file = 'Unity_v' + tag + '.alf'

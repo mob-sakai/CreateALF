@@ -39,9 +39,8 @@ jobs:
           console.dir( context )
 
           const tag = context.payload.issue.title
-          const file = `Unity_v${tag}.alf`
+          const file = 'Unity_v' + tag + '.alf'
           const headers = {'content-type':'application/text'}
-          console.log( tag,  file, headers)
 
           try
           {
@@ -57,7 +56,6 @@ jobs:
           console.log( 'uploadReleaseAsset')
           github.repos.uploadReleaseAsset({file, headers, name:file, url})
           console.log( 'complete!' )
-          # return result
 
 
     # - run: echo $GITHUB_CONTEXT

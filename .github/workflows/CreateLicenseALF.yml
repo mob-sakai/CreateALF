@@ -18,6 +18,11 @@ jobs:
       env:
         TAG: ${{ github.event.issue.title }}
 
+    - run: echo $TAG
+      env:
+        TAG: ${{ toJson(runner) }}
+
+
     - name: Create Release
       id: create_release
       continue-on-error: true

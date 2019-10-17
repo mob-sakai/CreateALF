@@ -12,15 +12,8 @@ jobs:
     container: docker://gableroux/unity3d:${{ github.event.issue.title }}-webgl
     
     steps:
-    - name: Create Manual Activation File
-      run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile || exit 0
-
-    - run: ls
-
-    # - uses: actions/upload-artifact@master
-    #   with:
-    #     name: artifact
-    #     path: Unity_v${{ github.event.issue.title }}.alf
+    # - name: Create Manual Activation File
+    #   run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile || exit 0
 
     - name: Create Release
       id: create_release
@@ -41,11 +34,9 @@ jobs:
         script: |
           return github.repos.getReleaseByTag({...context.issue, tag: context.issue.title})
 
-    
     - run: echo $GITHUB_CONTEXT
       env:
         GITHUB_CONTEXT: ${{ toJson(steps.get_release.outputs) }}
-
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1.0.1

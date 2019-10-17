@@ -36,7 +36,7 @@ jobs:
       with:
         github-token: ${{ github.token }}
         script: |
-          console.dir( context )
+          # console.dir( context )
 
           const tag = context.payload.issue.title
           const file = 'Unity_v' + tag + '.alf'
@@ -45,16 +45,18 @@ jobs:
           try
           {
           console.log( 'createRelease')
-            const url = await github.repos.createRelease({...context.issue, tag}).data.upload_url
+            const result = await github.repos.createRelease({...context.issue, tag})
+          console.dir( result)
           }
           catch
           {
           console.log( 'getReleaseByTag')
-            const url = await github.repos.getReleaseByTag({...context.issue, tag}).data.upload_url
+            const result = await github.repos.getReleaseByTag({...context.issue, tag})
+          console.dir( result)
           }
 
           console.log( 'uploadReleaseAsset')
-          github.repos.uploadReleaseAsset({file, headers, name:file, url})
+          github.repos.uploadReleaseAsset({file, headers, name:file, url:result.data.upload_url})
           console.log( 'complete!' )
 
 

@@ -17,10 +17,10 @@ jobs:
 
     - run: ls
 
-    - uses: actions/upload-artifact@master
-      with:
-        name: artifact
-        path: Unity_v${{ github.event.issue.title }}.alf
+    # - uses: actions/upload-artifact@master
+    #   with:
+    #     name: artifact
+    #     path: Unity_v${{ github.event.issue.title }}.alf
 
     - name: Create Release
       id: create_release
@@ -33,13 +33,27 @@ jobs:
         draft: false
         prerelease: false
 
+    - name: Get Upload Url
+      id: get_release
+      uses: actions/github-script@0.2.0
+      with:
+        github-token: ${{ github.token }}
+        script: |
+          return github.repos.getReleaseByTag({...context.issue, tag: context.issue.title})
+
+    
+    - run: echo $GITHUB_CONTEXT
+      env:
+        GITHUB_CONTEXT: ${{ toJson(steps.get_release.outputs) }}
+
+
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: artifact
+        upload_url: ${{ steps.get_release.outputs.result.upload_url }}
+        asset_path: Unity_v${{ github.event.issue.title }}.alf
         asset_name: ${{ github.event.issue.title }}.alf
         asset_content_type: application/text
     

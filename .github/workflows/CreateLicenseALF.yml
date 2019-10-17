@@ -34,7 +34,10 @@ jobs:
         github-token: ${{ github.token }}
         script: |
           console.dir( context )
-          return github.repos.getReleaseByTag({...context.issue, tag: '2018.4.8f1'})
+          const result = github.repos.getReleaseByTag({...context.issue, tag: context.payload.issue.title})
+          console.dir( result )
+          return result.upload_url
+
 
     - run: echo $GITHUB_CONTEXT
       env:
@@ -45,7 +48,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.get_release.outputs.result.upload_url }}
+        upload_url: ${{ steps.get_release.outputs.result }}
         asset_path: Unity_v${{ github.event.issue.title }}.alf
         asset_name: ${{ github.event.issue.title }}.alf
         asset_content_type: application/text

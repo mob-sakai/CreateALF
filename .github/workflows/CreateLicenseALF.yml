@@ -61,7 +61,7 @@ jobs:
           github.repos.uploadReleaseAsset({file, headers, name:file, url:result.data.upload_url})
 
           console.log( 'createComment')
-          github.issues.createComment({...context.issue, body: '👋 Thanks for reporting!\nresult.data.download_url'})
+          github.issues.createComment({...context.issue, body: `👋 Thanks for reporting!\n${result.data.download_url}`})
           console.log( 'complete!' )
 
 
@@ -80,11 +80,12 @@ jobs:
     #     asset_name: ${{ github.event.issue.title }}.alf
     #     asset_content_type: application/text
     
-    # - name: Issue Comment
-    #   uses: actions/github-script@0.2.0
-    #   env:
-    #     DOWLOAD_URL: ${{ steps.get_release.outputs.result.data.download_url }}
-    #   with:
-    #     github-token: ${{ github.token }}
-    #     script: |
-    #       github.issues.createComment({...context.issue, body: '👋 Thanks for reporting!\nprocess.env.DOWLOAD_URL'})
+    - name: Issue Comment
+      uses: actions/github-script@0.2.0
+      if: never()
+      env:
+        DOWLOAD_URL: ${{ steps.get_release.outputs.result.data.download_url }}
+      with:
+        github-token: ${{ github.token }}
+        script: |
+          github.issues.createComment({...context.issue, body: '👋 Thanks for reporting!\nprocess.env.DOWLOAD_URL'})

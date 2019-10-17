@@ -45,7 +45,7 @@ jobs:
 
           const tag = context.payload.issue.title
           const file = `Unity_v${tag}.alf`
-          const name = file + new Date().toFormat("YYYYMMDDHH24MISS")
+          const name = `${file}_${context.payload.issue.updated_at`}
           //const headers = {'content-type':'application/text'}
           const headers = { 'content-type': 'application/text', 'content-length': -1 }
           let result = {}

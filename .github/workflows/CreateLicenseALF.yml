@@ -34,7 +34,7 @@ jobs:
         github-token: ${{ github.token }}
         script: |
           console.dir( context )
-          return github.repos.getReleaseByTag({...context.issue, tag: '2018.4.8f1')
+          return github.repos.getReleaseByTag({...context.issue, tag: '2018.4.8f1'})
 
     - run: echo $GITHUB_CONTEXT
       env:

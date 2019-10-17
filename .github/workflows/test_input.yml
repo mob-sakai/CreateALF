@@ -4,15 +4,6 @@ on:
   issues:
     types: [opened]
 
-inputs:
-  numOctocats:
-    description: 'Number of Octocats'
-    required: false
-    default: '1'
-  octocatEyeColor:
-    description: 'Eye color of the Octocats'
-    required: true
-
 jobs:
   build:
 
@@ -20,4 +11,4 @@ jobs:
     
     steps:
     - name: test input
-      run: echo "${INPUT_NUMOCTOCATS} ${INPUT_OCTOCATEYECOLOR}"
+      run: echo ${{ github.event.payload.issue.title }}

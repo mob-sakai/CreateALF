@@ -39,19 +39,20 @@ jobs:
           // console.dir( context )
 
           const tag = context.payload.issue.title
-          const file = 'Unity_v' + tag + '.alf'
+          const file = `Unity_v${tag}.alf`
           const headers = {'content-type':'application/text'}
+          let result = {}
 
           try
           {
           console.log( 'createRelease')
-            const result = await github.repos.createRelease({...context.issue, tag})
+            result = await github.repos.createRelease({...context.issue, tag})
           console.dir( result)
           }
           catch
           {
           console.log( 'getReleaseByTag')
-            const result = await github.repos.getReleaseByTag({...context.issue, tag})
+            result = await github.repos.getReleaseByTag({...context.issue, tag})
           console.dir( result)
           }
 

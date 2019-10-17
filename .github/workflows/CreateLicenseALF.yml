@@ -9,11 +9,14 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    container: docker://gableroux/unity3d:${{ github.event.issue.title }}-webgl
+    # container: docker://gableroux/unity3d:${{ github.event.issue.title }}-webgl
     
     steps:
-    - name: Create Manual Activation File
-      run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile || exit 0
+    # - name: Create Manual Activation File
+    #   run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile || exit 0
+    - run: echo 'hogehoge' > Unity_v${TAG}.alf
+      env:
+        TAG: ${{ github.event.issue.title }}
 
     - name: Create Release
       id: create_release

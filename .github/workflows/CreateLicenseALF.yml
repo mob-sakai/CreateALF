@@ -36,10 +36,12 @@ jobs:
       with:
         github-token: ${{ github.token }}
         script: |
-          // console.dir( context )
+          require('date-utils');
+          console.dir( context )
 
           const tag = context.payload.issue.title
           const file = `Unity_v${tag}.alf`
+          const name = file + new Date().toFormat("YYYYMMDDHH24MISS")
           //const headers = {'content-type':'application/text'}
           const headers = { 'content-type': 'application/text', 'content-length': -1 }
           let result = {}
@@ -48,17 +50,17 @@ jobs:
           {
           console.log( 'createRelease')
             result = await github.repos.createRelease({...context.issue, tag})
-          console.dir( result)
+          //console.dir( result)
           }
           catch
           {
           console.log( 'getReleaseByTag')
             result = await github.repos.getReleaseByTag({...context.issue, tag})
-          console.dir( result)
+          //console.dir( result)
           }
 
           console.log( 'uploadReleaseAsset')
-          result = await github.repos.uploadReleaseAsset({file, headers, name:file, url:result.data.upload_url})
+          result = await github.repos.uploadReleaseAsset({file, headers, name, url:result.data.upload_url})
 
           console.log( 'createComment')
           await github.issues.createComment({...context.issue, body: `👋 Thanks for reporting!\n${result.data.download_url}`})

@@ -1,15 +1,15 @@
 name: Create ALF File
 
-on: [pull_request]
-  # issues:
-  #   types: [opened]
+on:
+  issues:
+    types: [opened]
 
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
-    container: docker://gableroux/unity3d:2018.4.9f1-webgl
+    container: docker://gableroux/unity3d:${{ github.event.issue.title }}-webgl
     
     steps:
     - name: Create Manual Activation File
@@ -18,15 +18,16 @@ jobs:
     - uses: actions/upload-artifact@master
       with:
         name: artifact
-        path: Unity_v2018.4.9f1.alf
+        path: Unity_v${{ github.event.issue.title }}.alf
 
     - name: Create Release
+      id: create_release
       uses: actions/create-release@v1.0.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.event.payload.issue.title }}
-        release_name: Release ${{ github.ref }}
+        tag_name: ${{ github.event.issue.title }}
+        release_name: ${{ github.event.issue.title }}
         draft: false
         prerelease: false
 
@@ -35,7 +36,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./my-artifact.zip
-        asset_name: my-artifact.zip
-        asset_content_type: application/zip
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: artifact
+        asset_name: ${{ github.event.issue.title }}.alf
+        asset_content_type: application/text

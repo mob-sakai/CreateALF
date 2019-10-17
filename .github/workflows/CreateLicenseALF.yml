@@ -14,7 +14,9 @@ jobs:
     steps:
     - name: Create Manual Activation File
       run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile || exit 0
-      
+
+    - run: ls
+
     # - run: echo 'hogehoge' > Unity_v${TAG}.alf
     #   env:
     #     TAG: ${{ github.event.issue.title }}

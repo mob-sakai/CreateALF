@@ -36,7 +36,7 @@ jobs:
           console.dir( context )
           const result = await github.repos.getReleaseByTag({...context.issue, tag: context.payload.issue.title})
           console.dir( result )
-          return result.upload_url
+          return result.data.upload_url
 
 
     - run: echo $GITHUB_CONTEXT

@@ -9,11 +9,11 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    # container: docker://gableroux/unity3d:${{ github.event.issue.title }}-webgl
+    container: docker://gableroux/unity3d:${{ github.event.issue.title }}-webgl
     
     steps:
-    # - name: Create Manual Activation File
-    #   run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile || exit 0
+    - name: Create Manual Activation File
+      run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile || exit 0
 
     - name: Create Release
       id: create_release
@@ -36,7 +36,7 @@ jobs:
           console.dir( context )
           const result = await github.repos.getReleaseByTag({...context.issue, tag: context.payload.issue.title})
           console.dir( result )
-          return result.data.upload_url
+          return result
 
 
     - run: echo $GITHUB_CONTEXT
@@ -48,7 +48,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.get_release.outputs.result }}
+        upload_url: ${{ steps.get_release.outputs.result.data.upload_url }}
         asset_path: Unity_v${{ github.event.issue.title }}.alf
         asset_name: ${{ github.event.issue.title }}.alf
         asset_content_type: application/text

@@ -9,16 +9,18 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    container: docker://gableroux/unity3d:${{ github.event.issue.title }}-webgl
+    container: docker://gableroux/unity3d:${{ context.issue.title }}-webgl
     
     steps:
     - name: Create Manual Activation File
       run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile || exit 0
 
+    - run: ls
+
     - uses: actions/upload-artifact@master
       with:
         name: artifact
-        path: Unity_v${{ github.event.issue.title }}.alf
+        path: Unity_v${{ context.issue.title }}.alf
 
     - name: Create Release
       id: create_release
@@ -26,8 +28,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.event.issue.title }}
-        release_name: ${{ github.event.issue.title }}
+        tag_name: ${{ context.issue.title }}
+        release_name: ${{ context.issue.title }}
         draft: false
         prerelease: false
 
@@ -38,5 +40,11 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: artifact
-        asset_name: ${{ github.event.issue.title }}.alf
+        asset_name: ${{ context.issue.title }}.alf
         asset_content_type: application/text
+    
+    - name: Issue Comment
+      uses: actions/github-script@0.2.0
+      with:
+        github-token: ${{ github.token }}
+        script: github.issues.createComment({...context.issue, body: '👋 Thanks for reporting!'})

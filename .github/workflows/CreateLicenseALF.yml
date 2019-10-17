@@ -31,9 +31,10 @@ jobs:
       id: get_release
       uses: actions/github-script@0.2.0
       with:
-        # github-token: ${{ github.token }}
+        github-token: ${{ github.token }}
         script: |
-          return github.repos.getReleaseByTag({...context.issue, tag: ${{ github.event.issue.title }})
+          console.dir( context )
+          return github.repos.getReleaseByTag({...context.issue, tag: context.payload.issue.title)
 
     - run: echo $GITHUB_CONTEXT
       env:

@@ -9,7 +9,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    container: docker://gableroux/unity3d:${{ context.issue.title }}-webgl
+    container: docker://gableroux/unity3d:${{ github.event.issue.title }}-webgl
     
     steps:
     - name: Create Manual Activation File
@@ -20,7 +20,7 @@ jobs:
     - uses: actions/upload-artifact@master
       with:
         name: artifact
-        path: Unity_v${{ context.issue.title }}.alf
+        path: Unity_v${{ github.event.issue.title }}.alf
 
     - name: Create Release
       id: create_release
@@ -28,8 +28,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ context.issue.title }}
-        release_name: ${{ context.issue.title }}
+        tag_name: ${{ github.event.issue.title }}
+        release_name: ${{ github.event.issue.title }}
         draft: false
         prerelease: false
 
@@ -40,7 +40,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: artifact
-        asset_name: ${{ context.issue.title }}.alf
+        asset_name: ${{ github.event.issue.title }}.alf
         asset_content_type: application/text
     
     - name: Issue Comment

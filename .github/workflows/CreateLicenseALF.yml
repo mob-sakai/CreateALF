@@ -63,29 +63,3 @@ jobs:
           console.log( 'createComment')
           github.issues.createComment({...context.issue, body: `👋 Thanks for reporting!\n${result.data.download_url}`})
           console.log( 'complete!' )
-
-
-
-    # - run: echo $GITHUB_CONTEXT
-    #   env:
-    #     GITHUB_CONTEXT: ${{ toJson(steps.get_release.outputs) }}
-
-    # - name: Upload Release Asset
-    #   uses: actions/upload-release-asset@v1.0.1
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   with:
-    #     upload_url: ${{ steps.get_release.outputs.result.data.upload_url }}
-    #     asset_path: Unity_v${{ github.event.issue.title }}.alf
-    #     asset_name: ${{ github.event.issue.title }}.alf
-    #     asset_content_type: application/text
-    
-    - name: Issue Comment
-      uses: actions/github-script@0.2.0
-      if: never()
-      env:
-        DOWLOAD_URL: ${{ steps.get_release.outputs.result.data.download_url }}
-      with:
-        github-token: ${{ github.token }}
-        script: |
-          github.issues.createComment({...context.issue, body: '👋 Thanks for reporting!\nprocess.env.DOWLOAD_URL'})

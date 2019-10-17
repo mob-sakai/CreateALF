@@ -34,7 +34,7 @@ jobs:
         github-token: ${{ github.token }}
         script: |
           console.dir( context )
-          const result = github.repos.getReleaseByTag({...context.issue, tag: context.payload.issue.title})
+          const result = await github.repos.getReleaseByTag({...context.issue, tag: context.payload.issue.title})
           console.dir( result )
           return result.upload_url
 

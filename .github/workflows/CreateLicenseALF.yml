@@ -36,7 +36,6 @@ jobs:
       with:
         github-token: ${{ github.token }}
         script: |
-          require('date-utils');
           console.dir( context )
 
           const tag = context.payload.issue.title

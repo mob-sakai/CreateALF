@@ -58,8 +58,8 @@ jobs:
           }
 
           console.log( 'uploadReleaseAsset')
-          github.repos.uploadReleaseAsset({file, headers, name:file, url:result.data.upload_url})
+          result = await github.repos.uploadReleaseAsset({file, headers, name:file, url:result.data.upload_url})
 
           console.log( 'createComment')
-          github.issues.createComment({...context.issue, body: `👋 Thanks for reporting!\n${result.data.download_url}`})
+          await github.issues.createComment({...context.issue, body: `👋 Thanks for reporting!\n${result.data.download_url}`})
           console.log( 'complete!' )

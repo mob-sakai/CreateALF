@@ -9,31 +9,31 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    # container: docker://gableroux/unity3d:${{ github.event.issue.title }}-webgl
+    container: docker://gableroux/unity3d:${{ github.event.issue.title }}-webgl
     
     steps:
-    # - name: Create Manual Activation File
-    #   run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile || exit 0
-    - run: echo 'hogehoge' > Unity_v${TAG}.alf
-      env:
-        TAG: ${{ github.event.issue.title }}
+    - name: Create Manual Activation File
+      run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile || exit 0
+      
+    # - run: echo 'hogehoge' > Unity_v${TAG}.alf
+    #   env:
+    #     TAG: ${{ github.event.issue.title }}
 
-    - run: echo $TAG
-      env:
-        TAG: ${{ toJson(github) }}
+    # - run: echo $TAG
+    #   env:
+    #     TAG: ${{ toJson(github) }}
 
-
-    - name: Create Release
-      id: create_release
-      continue-on-error: true
-      uses: actions/create-release@v1.0.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.event.issue.title }}
-        release_name: ${{ github.event.issue.title }}
-        draft: false
-        prerelease: false
+    # - name: Create Release
+    #   id: create_release
+    #   continue-on-error: true
+    #   uses: actions/create-release@v1.0.0
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     tag_name: ${{ github.event.issue.title }}
+    #     release_name: ${{ github.event.issue.title }}
+    #     draft: false
+    #     prerelease: false
 
     - name: Create Release With Asset
       id: get_release
@@ -68,5 +68,5 @@ jobs:
           console.dir( result)
 
           console.log( 'createComment')
-          await github.issues.createComment({...context.issue, body: `👋 Thanks for reporting!\n${result.data.download_url}`})
+          await github.issues.createComment({...context.issue, body: `👋 Thanks for reporting!\n${result.data.browser_download_url}`})
           console.log( 'complete!' )

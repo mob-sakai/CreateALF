@@ -3,6 +3,8 @@ name: Create ALF File
 on:
   issues:
     types: [opened, reopened]
+  pull_request:
+    types: [opened, reopened, closed]
 
 jobs:
   build:

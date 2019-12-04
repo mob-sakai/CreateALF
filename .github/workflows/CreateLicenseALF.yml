@@ -1,6 +1,10 @@
 name: Create ALF File
 
 on:
+  push:
+    branches:
+      - '*'
+
   issues:
     types: [opened, reopened]
   pull_request:

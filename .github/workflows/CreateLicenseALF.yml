@@ -4,71 +4,31 @@ on:
   issues:
     types: [opened, reopened]
 
-
 jobs:
   build:
 
     runs-on: ubuntu-latest
-    container: docker://gableroux/unity3d:${{ github.event.issue.title }}-webgl
+    container: docker://gableroux/unity3d:${{ matrix.unity-version }}
+    strategy:
+      matrix:
+        unity-version: [2018.4.12f1]
     
     steps:
+
+    - name: Cache Alf
+      id: cache-alf
+      uses: actions/cache@v1
+      with:
+        path: artifact
+        key: ${{ matrix.unity-version }}-primes
+        
     - name: Create Manual Activation File
+      if: steps.cache-alf.outputs.cache-hit != 'true'
       run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile || exit 0
 
-    - run: ls
-
-    # - run: echo 'hogehoge' > Unity_v${TAG}.alf
-    #   env:
-    #     TAG: ${{ github.event.issue.title }}
-
-    # - run: echo $TAG
-    #   env:
-    #     TAG: ${{ toJson(github) }}
-
-    # - name: Create Release
-    #   id: create_release
-    #   continue-on-error: true
-    #   uses: actions/create-release@v1.0.0
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   with:
-    #     tag_name: ${{ github.event.issue.title }}
-    #     release_name: ${{ github.event.issue.title }}
-    #     draft: false
-    #     prerelease: false
-
-    - name: Create Release With Asset
-      id: get_release
-      uses: actions/github-script@0.2.0
-      with:
-        github-token: ${{ github.token }}
-        script: |
-          console.dir( context )
-
-          const tag = context.payload.issue.title
-          const file = `Unity_v${tag}.alf`
-          const name = `${file}_${context.payload.issue.updated_at}`
-          //const headers = {'content-type':'application/text'}
-          const headers = { 'content-type': 'application/text', 'content-length': -1 }
-          let result = {}
-
-          try
-          {
-          console.log( 'createRelease')
-            result = await github.repos.createRelease({...context.issue, tag})
-          //console.dir( result)
-          }
-          catch
-          {
-          console.log( 'getReleaseByTag')
-            result = await github.repos.getReleaseByTag({...context.issue, tag})
-          //console.dir( result)
-          }
-
-          console.log( 'uploadReleaseAsset')
-          result = await github.repos.uploadReleaseAsset({file, headers, name, url:result.data.upload_url})
-          console.dir( result)
-
-          console.log( 'createComment')
-          await github.issues.createComment({...context.issue, body: `👋 Thanks for reporting!\n${result.data.browser_download_url}`})
-          console.log( 'complete!' )
+    - name: Copy To Artifact
+      if: steps.cache-alf.outputs.cache-hit != 'true'
+      run: |
+        mkdir artifact
+        cp Unity_v${{ matrix.unity-version }}.alf artifact
+        

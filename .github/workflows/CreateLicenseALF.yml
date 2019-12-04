@@ -22,30 +22,32 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
-    - name: Cache Alf
-      id: cache-alf
+    - name: Cache Unity License File
+      id: cache
       uses: actions/cache@v1
       with:
-        path: artifact
-        key: ${{ matrix.unity-version }}-alf
+        path: .ulf
+        key: ${{ matrix.unity-version }}.ulf
         
     - name: Create Manual Activation File
-      if: steps.cache-alf.outputs.cache-hit != 'true'
+      if: steps.cache.outputs.cache-hit != 'true'
       run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile || exit 0
 
-    - uses: actions/upload-artifact@v1
+    - name: Setup node
+      uses: actions/setup-node@v1.2.0
       with:
-        name: Unity_v${{ matrix.unity-version }}.alf
-        path: Unity_v${{ matrix.unity-version }}.alf
+        node-version: 12
 
-    - name: Activate
+    - name: Activate Unity License File
+      if: steps.cache.outputs.cache-hit != 'true'
       run: npm i && node activate.js ${{ secrets.UNITY_USER_MAIL }} ${{ secrets.UNITY_USER_PASSWORD }} Unity_v${{ matrix.unity-version }}.alf
 
-    - run: ls
+    - name: (OPTION)upload-artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: ${{ matrix.unity-version }}
+        path: Unity_v*.ulf
 
-    - name: Copy To Artifact
-      if: steps.cache-alf.outputs.cache-hit != 'true'
-      run: |
-        mkdir artifact
-        cp Unity_v${{ matrix.unity-version }}.alf artifact
-        
+    - name: Move Unity License File To Cache
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: mkdir .ulf && mv Unity_v*.ulf .ulf/ulf

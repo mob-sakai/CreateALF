@@ -20,17 +20,28 @@ jobs:
         unity-version: [2018.4.12f1]
     
     steps:
+    - uses: actions/checkout@v1
 
     - name: Cache Alf
       id: cache-alf
       uses: actions/cache@v1
       with:
         path: artifact
-        key: ${{ matrix.unity-version }}-primes
+        key: ${{ matrix.unity-version }}-alf
         
     - name: Create Manual Activation File
       if: steps.cache-alf.outputs.cache-hit != 'true'
       run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile || exit 0
+
+    - uses: actions/upload-artifact@v1
+      with:
+        name: Unity_v${{ matrix.unity-version }}.alf
+        path: Unity_v${{ matrix.unity-version }}.alf
+
+    - name: Activate
+      run: npm i && node activate.js ${{ secrets.UNITY_USER_MAIL }} ${{ secrets.UNITY_USER_PASSWORD }} Unity_v${{ matrix.unity-version }}.alf
+
+    - run: ls
 
     - name: Copy To Artifact
       if: steps.cache-alf.outputs.cache-hit != 'true'

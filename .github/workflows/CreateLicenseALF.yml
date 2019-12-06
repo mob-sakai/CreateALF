@@ -50,19 +50,15 @@ jobs:
         apt -y install jq
 
         NAME=ULF_`echo ${{ matrix.unity-version }} | tr '.' '\n' | head -n 1`
-        echo $NAME
         JSON=$(cat << EOS
         ${{ toJson(secrets) }}
         EOS
         )
 
         ULF=`echo $JSON | jq .$NAME`
-        echo $ULF
-
         if [[ "$NAME" != "null" ]]; then
           echo $NAME
         fi
-
         if [[ "$ULF" != "null" ]]; then
           echo "$NAME あるで"
           echo $ULF > temp.ulf

@@ -45,11 +45,15 @@ jobs:
     - name: Echo secrets　ULF new
       run: |
         NAME=ULF_`echo ${{ matrix.unity-version }} | tr '.' '\n' | head -n 1`
-        ULF=`echo "${{ toJson(secrets) }}" | jq ".${NAME}"`
-        if [[ -n ${ULF} ]]; then
-          echo "${NAME} あるで"
+        JSON=$(cat << EOS
+        ${{ toJson(secrets) }}
+        EOS
+        )
+        ULF=`echo "$JSON" | jq ".$NAME"`
+        if [[ -n $ULF ]]; then
+          echo "$NAME あるで"
         else
-          echo "${NAME} ないで"
+          echo "$NAME ないで"
         fi
 
     # - name: ULF_2018

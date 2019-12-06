@@ -50,7 +50,8 @@ jobs:
         EOS
         )
         ULF=`echo "$JSON" | jq ".$NAME"`
-        if [[ -n $ULF ]]; then
+        echo $ULF
+        if [[ -n "$ULF" ]]; then
           echo "$NAME あるで"
         else
           echo "$NAME ないで"

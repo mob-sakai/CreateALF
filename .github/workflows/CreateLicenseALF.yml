@@ -31,13 +31,15 @@ jobs:
 
     - name: Echo secrets
       run: |
-        echo ${{ secrets['ULF_2018'] }}
-        echo ${{ secrets['ULF_2017'] }}
+        ULF=${{ secrets['ULF_2018'] }}
+        [[ -n "$ULF" ]] && echo "$ULF"
+
+
     
     
 
     # - name: ULF_2018
-    #   if: secrets.ULF_2018
+    #   if: secrets.ULF_2018 != 0
     #   run: echo ULF_2018 is exist
 
     # - name: ULF_2017

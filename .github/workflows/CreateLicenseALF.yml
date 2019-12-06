@@ -58,6 +58,11 @@ jobs:
 
         ULF=`echo $JSON | jq .$NAME`
         echo $ULF
+
+        if [[ "$NAME" != "null" ]]; then
+          echo $NAME
+        fi
+
         if [[ "$ULF" != "null" ]]; then
           echo "$NAME あるで"
           echo $ULF > temp.ulf

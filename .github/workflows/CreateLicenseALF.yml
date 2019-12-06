@@ -33,10 +33,11 @@ jobs:
       id: echo-ulf
       run: |
         ULF=${{ secrets['ULF_2018'] }}
-        [[ -n "$ULF" ]] && echo "$ULF"
+        [[ -n "$ULF" ]] && exit 0 || exit 1
 
     - name: ULF_2018
-      run: echo ${{ toJson(steps.echo-ulf.outputs) }}
+      if: always()
+      run: echo ${{ toJson(steps.echo-ulf) }}
     
     
 

@@ -17,7 +17,7 @@ jobs:
     # container: docker://gableroux/unity3d:${{ matrix.unity-version }}
     strategy:
       matrix:
-        unity-version: [2018.4.12f1, 2017.4.12f1]
+        unity-version: [2018.4.12f1, 2017.4.12f1, 2019.4.12f1]
     
     steps:
     # - uses: actions/checkout@v1
@@ -49,9 +49,9 @@ jobs:
         ${{ toJson(secrets) }}
         EOS
         )
-        ULF=`echo "$JSON" | jq ".$NAME"`
+        ULF=`echo $JSON | jq .$NAME`
         echo $ULF
-        if [[ -n "$ULF" ]]; then
+        if [[ "$ULF" != "null" ]]; then
           echo "$NAME あるで"
         else
           echo "$NAME ないで"

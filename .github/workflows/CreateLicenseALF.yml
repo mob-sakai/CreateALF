@@ -30,11 +30,13 @@ jobs:
     #     key: ${{ matrix.unity-version }}.ulf
 
     - name: Echo secrets
+      id: echo-ulf
       run: |
         ULF=${{ secrets['ULF_2018'] }}
         [[ -n "$ULF" ]] && echo "$ULF"
 
-
+    - name: ULF_2018
+      run: echo ${{ toJson(steps.echo-ulf.outputs) }}
     
     
 

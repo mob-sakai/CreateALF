@@ -5,6 +5,7 @@ inputs:
     description: 'unity version'
     required: true
 runs:
-  using: 'entrypoint.sh'
+  using: 'sh'
   args:
+    - 'entrypoint.sh'
     - '${{ inputs.unity-version }}'

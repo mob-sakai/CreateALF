@@ -20,55 +20,69 @@ jobs:
         unity-version: [2018.4.12f1]
     
     steps:
-    - uses: actions/checkout@v1
+    # - uses: actions/checkout@v1
 
-    - name: Cache Unity License File
-      id: cache
-      uses: actions/cache@v1
-      with:
-        path: .ulf
-        key: ${{ matrix.unity-version }}.ulf
+    # - name: Cache Unity License File
+    #   id: cache
+    #   uses: actions/cache@v1
+    #   with:
+    #     path: .ulf
+    #     key: ${{ matrix.unity-version }}.ulf
+
+    - name: Echo secrets
+      run: |
+        echo ${{ toJson(secrets) }}
+        echo ${{ secrets["ULF_2018"] }}
+        echo ${{ secrets["ULF_2017"] }}
         
-    - name: Create Manual Activation File
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile || exit 0
+    - name: ULF_2018
+      if: secrets["ULF_2018"]
+      run: echo ULF_2018 is exist
+
+    - name: ULF_2017
+      if: secrets["ULF_2017"]
+      run: echo ULF_2017 is exist
+
+    # - name: Create Manual Activation File
+    #   if: steps.cache.outputs.cache-hit != 'true'
+    #   run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile || exit 0
 
     # - name: Activate Unity License File With Puppeteer
     #   uses: ianwalter/puppeteer@v2.0.0
     #   with:
     #     args: npm i && node activate.js ${{ secrets.UNITY_USER_MAIL }} ${{ secrets.UNITY_USER_PASSWORD }} Unity_v${{ matrix.unity-version }}.alf
 
-    - name: Setup node
-      uses: actions/setup-node@v1.2.0
-      with:
-        node-version: 12
+    # - name: Setup node
+    #   uses: actions/setup-node@v1.2.0
+    #   with:
+    #     node-version: 12
     
-    - name: Activate Unity License File With Puppeteer
-      run: |
-        apt-get update
-        apt-get install -yq libgconf-2-4
-        apt-get install -y wget --no-install-recommends
-        wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-        sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
-        apt-get update
-        apt-get install -y google-chrome-unstable --no-install-recommends
-        rm -rf /var/lib/apt/lists/*
-        npm i
-        node activate.js ${{ secrets.UNITY_USER_MAIL }} ${{ secrets.UNITY_USER_PASSWORD }} Unity_v${{ matrix.unity-version }}.alf
-      env:
-        PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
+    # - name: Activate Unity License File With Puppeteer
+    #   run: |
+    #     apt-get update
+    #     apt-get install -yq libgconf-2-4
+    #     apt-get install -y wget --no-install-recommends
+    #     wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+    #     sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+    #     apt-get update
+    #     apt-get install -y google-chrome-unstable --no-install-recommends
+    #     rm -rf /var/lib/apt/lists/*
+    #     npm i
+    #     node activate.js ${{ secrets.UNITY_USER_MAIL }} ${{ secrets.UNITY_USER_PASSWORD }} Unity_v${{ matrix.unity-version }}.alf
+    #   env:
+    #     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
 
-        
+
     # - name: Activate Unity License File
     #   if: steps.cache.outputs.cache-hit != 'true'
     #   run: npm i && node activate.js ${{ secrets.UNITY_USER_MAIL }} ${{ secrets.UNITY_USER_PASSWORD }} Unity_v${{ matrix.unity-version }}.alf
 
-    - name: (OPTION)upload-artifact
-      uses: actions/upload-artifact@v1
-      with:
-        name: ${{ matrix.unity-version }}
-        path: Unity_v*.ulf
+    # - name: (OPTION)upload-artifact
+    #   uses: actions/upload-artifact@v1
+    #   with:
+    #     name: ${{ matrix.unity-version }}
+    #     path: Unity_v*.ulf
 
-    - name: Move Unity License File To Cache
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: mkdir .ulf && mv Unity_v*.ulf .ulf/ulf
+    # - name: Move Unity License File To Cache
+    #   if: steps.cache.outputs.cache-hit != 'true'
+    #   run: mkdir .ulf && mv Unity_v*.ulf .ulf/ulf

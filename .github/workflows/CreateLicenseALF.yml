@@ -42,6 +42,16 @@ jobs:
         ULF_2018: ${{ secrets.ULF_2018 }}
     
 
+    - name: Echo secrets　ULF new
+      run: |
+        NAME=ULF_`echo ${{ matrix.unity-version }} | tr '.' '\n' | head -n 1`
+        ULF=`echo "${{ toJson(secrets) }}" | jq ".${NAME}"`
+        if [[ -n ${ULF} ]]; then
+          echo "${NAME} あるで"
+        else
+          echo "${NAME} ないで"
+        fi
+
     # - name: ULF_2018
     #   if: secrets.ULF_2018 != 0
     #   run: echo ULF_2018 is exist

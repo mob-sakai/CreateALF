@@ -31,7 +31,7 @@ jobs:
 
     - name: Echo secrets　ULF_2018
       run: |
-        ehco ${{ secrets['ULF_2018'] }} > ulf
+        echo ${{ secrets['ULF_2018'] }} > ulf
         if [[ -s ulf ]]; then
           echo "ULF_2018あるで"
         else
@@ -40,7 +40,7 @@ jobs:
     
     - name: Echo secrets　ULF_2017
       run: |
-        ehco ${{ secrets['ULF_2018'] }} > ulf
+        echo ${{ secrets['ULF_2018'] }} > ulf
         if [[ -s ulf ]]; then
           echo "ULF_2017あるで"
         else

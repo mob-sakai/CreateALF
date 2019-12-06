@@ -36,11 +36,11 @@ jobs:
         echo ${{ secrets['ULF_2017'] }}
         
     - name: ULF_2018
-      if: secrets['ULF_2018']
+      if: secrets.ULF_2018
       run: echo ULF_2018 is exist
 
     - name: ULF_2017
-      if: secrets['ULF_2017']
+      if: secrets.ULF_2017
       run: echo ULF_2017 is exist
 
     # - name: Create Manual Activation File

@@ -29,17 +29,23 @@ jobs:
     #     path: .ulf
     #     key: ${{ matrix.unity-version }}.ulf
 
-    - name: Echo secrets
-      id: echo-ulf
+    - name: Echo secrets　ULF_2018
       run: |
-        ULF=${{ secrets['ULF_2018'] }}
-        [[ -n "$ULF" ]] && exit 0 || exit 1
-
-    - name: ULF_2018
-      if: always()
-      run: echo ${{ toJson(steps.echo-ulf) }}
+        ehco ${{ secrets['ULF_2018'] }} > ulf
+        if [[ -s ulf ]]; then
+          echo "ULF_2018あるで"
+        else
+          echo "ULF_2018ないで"
+        fi
     
-    
+    - name: Echo secrets　ULF_2017
+      run: |
+        ehco ${{ secrets['ULF_2018'] }} > ulf
+        if [[ -s ulf ]]; then
+          echo "ULF_2017あるで"
+        else
+          echo "ULF_2017ないで"
+        fi
 
     # - name: ULF_2018
     #   if: secrets.ULF_2018 != 0

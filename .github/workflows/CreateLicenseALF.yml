@@ -44,16 +44,20 @@ jobs:
 
     - name: Unity
       run: |
+        set -x
+        set +e
         apt -y update
         apt -y install jq
 
         NAME=ULF_`echo ${{ matrix.unity-version }} | tr '.' '\n' | head -n 1`
+        echo $NAME
         JSON=$(cat << EOS
         ${{ toJson(secrets) }}
         EOS
         )
 
         ULF=`echo $JSON | jq .$NAME`
+        echo $ULF
         if [[ "$ULF" != "null" ]]; then
           echo "$NAME あるで"
           echo $ULF > temp.ulf
@@ -63,7 +67,7 @@ jobs:
         else
           echo "$NAME ないで"
           /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile
-          run: mkdir .alf && mv Unity_v${{ matrix.unity-version }}.alf .alf
+          mkdir .alf && mv Unity_v${{ matrix.unity-version }}.alf .alf
           echo "ALF吐き出しといた。artifactsからダウンロードして、手動でulfに変換、secretsに追加してクレメンス！"
           exit 1
         fi

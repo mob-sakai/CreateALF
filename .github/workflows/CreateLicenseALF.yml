@@ -31,7 +31,6 @@ jobs:
 
     - name: Echo secrets
       run: |
-        # echo ${{ toJson(secrets) }}
         echo ${{ secrets['ULF_2018'] }}
         echo ${{ secrets['ULF_2017'] }}
     

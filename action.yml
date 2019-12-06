@@ -1,12 +1,12 @@
 name: 'Hello World'
 description: 'Greet someone and record the time'
 inputs:
-  unity-version:  # id of input
+  unity-version:
     description: 'unity version'
     required: true
 runs:
   using: docker
-  image: docker://gableroux/unity3d:${{ inputs.unity-version }}
-  args:args:
-    - entrypoint.sh
-    - ${{ inputs.unity-version }}
+  image: 'docker://gableroux/unity3d:${{ inputs.unity-version }}'
+  args:
+    - 'entrypoint.sh'
+    - '${{ inputs.unity-version }}'

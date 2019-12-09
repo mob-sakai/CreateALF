@@ -14,7 +14,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    container: docker://gableroux/unity3d:${{ matrix.unity-version }}
+    # container: docker://gableroux/unity3d:${{ matrix.unity-version }}
     strategy:
       matrix:
         unity-version: [2018.4.12f1]

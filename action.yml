@@ -5,7 +5,11 @@ inputs:
     description: 'unity version'
     required: true
 runs:
-  using: 'sh'
+  using: 'docker'
+  image: 'Dockerfile'
   args:
     - 'entrypoint.sh'
     - '${{ inputs.unity-version }}'
+  env:
+    UNITY_VERSION: ${{ inputs.unity-version }}
+

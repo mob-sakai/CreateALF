@@ -10,6 +10,7 @@ runs:
   args:
     - 'entrypoint.sh'
     - '${{ inputs.unity-version }}'
+    - UNITY_VERSION=${{ inputs.unity-version }}
   env:
     UNITY_VERSION: ${{ inputs.unity-version }}
 

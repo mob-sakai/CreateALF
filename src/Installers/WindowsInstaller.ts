@@ -32,15 +32,15 @@ export class WindowsInstaller implements Installer {
         await exec(`bitsadmin /TRANSFER dlinstaller /download /priority foreground ${download_url} "${download_path}"`);
         
         console.log(`**** Install`);
-        await exec('UnitySetup64.exe /UI=reduced /S');
+        await exec('UnitySetup64.exe /UI=reduced /S /D=C:\\Unity');
 
         console.log(`**** Activate with ulf`);
         fs.writeFileSync('.ulf', option.ulf || '');
-        const code = await exec('C:\\Program Files\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf', [], exec_opt);
+        const code = await exec('C:\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf', [], exec_opt);
         console.log(`manualLicenseFile ${code}`);
         console.log(fs.readFileSync('.log'));
 
-        const actcode = await exec('C:\\Program\ Files\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile -createManualActivationFile');
+        const actcode = await exec('C:\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile -createManualActivationFile');
         const alf = `Unity_${version}.alf`
         console.log(`createManualActivationFile ${actcode} ${alf}`);
         console.log(`createManualActivationFile ${fs.readFileSync(alf)}`);
@@ -54,7 +54,8 @@ export class WindowsInstaller implements Installer {
         }
         else
         {
-            setFailed(`Secret '${option.ulfKey}' is undefined.`);
+        console.log(`**** Create activation file`);
+        setFailed(`Secret '${option.ulfKey}' is undefined.`);
 
         }
 

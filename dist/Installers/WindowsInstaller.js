@@ -44,13 +44,13 @@ class WindowsInstaller {
             console.log(`**** Download installer`);
             yield exec_1.exec(`bitsadmin /TRANSFER dlinstaller /download /priority foreground ${download_url} "${download_path}"`);
             console.log(`**** Install`);
-            yield exec_1.exec('UnitySetup64.exe /UI=reduced /S');
+            yield exec_1.exec('UnitySetup64.exe /UI=reduced /S /D=C:\\Unity');
             console.log(`**** Activate with ulf`);
             fs.writeFileSync('.ulf', option.ulf || '');
-            const code = yield exec_1.exec('C:\\Program Files\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf', [], exec_opt);
+            const code = yield exec_1.exec('C:\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf', [], exec_opt);
             console.log(`manualLicenseFile ${code}`);
             console.log(fs.readFileSync('.log'));
-            const actcode = yield exec_1.exec('C:\\Program\ Files\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile -createManualActivationFile');
+            const actcode = yield exec_1.exec('C:\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile -createManualActivationFile');
             const alf = `Unity_${version}.alf`;
             console.log(`createManualActivationFile ${actcode} ${alf}`);
             console.log(`createManualActivationFile ${fs.readFileSync(alf)}`);
@@ -59,6 +59,7 @@ class WindowsInstaller {
                 // const ret = await exec('C:\\Program Files\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile -manualLicenseFile .ulf');
             }
             else {
+                console.log(`**** Create activation file`);
                 core_1.setFailed(`Secret '${option.ulfKey}' is undefined.`);
             }
             // なんてことだ！

@@ -37,19 +37,22 @@ class WindowsInstaller {
     }
     Execute(args) {
         return __awaiter(this, void 0, void 0, function* () {
-            const unity = 'C:\\Program Files\\Unity\\Editor\\Unity.exe';
+            const unity_dir = `C:\\Program Files\\Unity${this.version}`;
+            const unity_exe = path.join(unity_dir, 'Editor\\Unity.exe');
             const exec_opt = { failOnStdErr: false, ignoreReturnCode: true, windowsVerbatimArguments: true };
+            console.log(unity_dir);
+            console.log(unity_exe);
             // Install
-            if (!fs.existsSync(unity)) {
+            if (!fs.existsSync(unity_exe)) {
                 const download_url = "https://beta.unity3d.com/download/" + utility_1.GetId(this.version || '') + "/Windows64EditorInstaller/UnitySetup64.exe";
                 const download_path = path.resolve('UnitySetup64.exe');
                 console.log(`**** Download Installer for Unity ${this.version}`);
                 yield exec_1.exec(`bitsadmin /TRANSFER dlinstaller /download /priority foreground ${download_url} ${download_path}`);
                 console.log(`**** Install Unity`);
-                yield exec_1.exec('UnitySetup64.exe /UI=reduced /S');
+                yield exec_1.exec(`UnitySetup64.exe /UI=reduced /S /D="${unity_dir}"`);
             }
             // Execute
-            const code = yield exec_1.exec(`"${unity}" -logFile .log ` + args, [], exec_opt);
+            const code = yield exec_1.exec(`"${unity_exe}" -logFile .log ` + args, [], exec_opt);
             if (fs.existsSync('.log'))
                 console.log(fs.readFileSync('.log', 'utf-8'));
             return code;

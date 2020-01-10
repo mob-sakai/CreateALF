@@ -49,7 +49,7 @@ class WindowsInstaller {
                 yield exec_1.exec('UnitySetup64.exe /UI=reduced /S');
             }
             // Execute
-            const code = yield exec_1.exec(`${unity} -logFile .log` + args, [], exec_opt);
+            const code = yield exec_1.exec(`${unity} -logFile .log ` + args, [], exec_opt);
             if (fs.existsSync('.log'))
                 console.log(fs.readFileSync('.log', 'utf-8'));
             return code;
@@ -61,7 +61,7 @@ class WindowsInstaller {
             // const exec_opt = {failOnStdErr: false, ignoreReturnCode: true, windowsVerbatimArguments: true}
             // const alf = `Unity_v${version}.alf`
             console.log(`**** Create activation file`);
-            yield this.Execute('-quit -batchMode -nographics -logfile .log -createManualActivationFile');
+            yield this.Execute('-quit -batchMode -nographics -createManualActivationFile');
             // await exec(`${unity} -quit -batchMode -nographics -logfile -createManualActivationFile`, [], exec_opt);
             // const alf = `Unity_v${version}.alf`
             // console.log(fs.readFileSync('.log', 'utf-8'));
@@ -94,7 +94,7 @@ class WindowsInstaller {
             }
             console.log(`**** Activate with ulf`);
             fs.writeFileSync('.ulf', option.ulf || '', 'utf-8');
-            const code = yield this.Execute('-quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf');
+            const code = yield this.Execute('-quit -batchMode -nographics -manualLicenseFile .ulf');
             console.log(code);
             // fs.writeFileSync('.ulf', option.ulf || '');
             // const activate_code = await exec(`${unity} -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf`, [], exec_opt);

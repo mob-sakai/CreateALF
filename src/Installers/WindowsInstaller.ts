@@ -41,7 +41,7 @@ export class WindowsInstaller implements Installer {
         }
 
         // Execute
-        const code = await exec(`${unity} -logFile .log` + args, [], exec_opt);
+        const code = await exec(`${unity} -logFile .log ` + args, [], exec_opt);
         if(fs.existsSync('.log'))
             console.log(fs.readFileSync('.log', 'utf-8'));
 
@@ -54,7 +54,7 @@ export class WindowsInstaller implements Installer {
 
         // const alf = `Unity_v${version}.alf`
         console.log(`**** Create activation file`);
-        await this.Execute('-quit -batchMode -nographics -logfile .log -createManualActivationFile');
+        await this.Execute('-quit -batchMode -nographics -createManualActivationFile');
 
 
         // await exec(`${unity} -quit -batchMode -nographics -logfile -createManualActivationFile`, [], exec_opt);
@@ -96,7 +96,7 @@ export class WindowsInstaller implements Installer {
         
         console.log(`**** Activate with ulf`);
         fs.writeFileSync('.ulf', option.ulf || '', 'utf-8');
-        const code = await this.Execute('-quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf');
+        const code = await this.Execute('-quit -batchMode -nographics -manualLicenseFile .ulf');
         console.log(code);
 
         // fs.writeFileSync('.ulf', option.ulf || '');

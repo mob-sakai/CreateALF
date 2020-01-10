@@ -24,7 +24,7 @@ export class WindowsInstaller implements Installer {
     async ExecuteSetUp(version: string, option: InstallOption): Promise<void> {
         const download_url = "https://beta.unity3d.com/download/" + GetId(version) + "/Windows64EditorInstaller/UnitySetup64.exe"
 
-        await exec('Invoke-WebRequest -Uri ' + download_url + ' -OutFile ./UnitySetup64.exe');
+        await exec(`bitsadmin /TRANSFER bj /download /priority foreground ${download_url} %CD%\\UnitySetup64.exe`);
         await exec('UnitySetup64.exe /UI=reduced /S /D=C:\\Program Files\\Unity');
 
         writeFileSync('.ulf', option.ulf || '');

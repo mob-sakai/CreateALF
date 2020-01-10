@@ -29,7 +29,7 @@ class WindowsInstaller {
     ExecuteSetUp(version, option) {
         return __awaiter(this, void 0, void 0, function* () {
             const download_url = "https://beta.unity3d.com/download/" + utility_1.GetId(version) + "/Windows64EditorInstaller/UnitySetup64.exe";
-            yield exec_1.exec('Invoke-WebRequest -Uri ' + download_url + ' -OutFile ./UnitySetup64.exe');
+            yield exec_1.exec(`bitsadmin /TRANSFER bj /download /priority foreground ${download_url} %CD%\\UnitySetup64.exe`);
             yield exec_1.exec('UnitySetup64.exe /UI=reduced /S /D=C:\\Program Files\\Unity');
             fs_1.writeFileSync('.ulf', option.ulf || '');
             const code = yield exec_1.exec('C:\\Program Files\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf');

@@ -17,5 +17,5 @@ jobs:
       - name: Echo
         run: echo $secrets
         env:
-          secrets: ${{ secrets.ULF_2017 }}
+          secrets: ${{ toJson(secrets) }}
 

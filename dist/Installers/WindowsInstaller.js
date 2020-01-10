@@ -39,8 +39,19 @@ class WindowsInstaller {
         return __awaiter(this, void 0, void 0, function* () {
             const unity = '"C:\\Program Files\\Unity\\Editor\\Unity.exe"';
             const exec_opt = { failOnStdErr: false, ignoreReturnCode: true, windowsVerbatimArguments: true };
-            const code = yield exec_1.exec(`${unity} -batchMode -nographics -logfile .log ` + args, [], exec_opt);
-            console.log(fs.readFileSync('.log', 'utf-8'));
+            // Install
+            if (!fs.existsSync(unity)) {
+                const download_url = "https://beta.unity3d.com/download/" + utility_1.GetId(this.version || '') + "/Windows64EditorInstaller/UnitySetup64.exe";
+                const download_path = path.resolve('UnitySetup64.exe');
+                console.log(`**** Download Installer for Unity ${this.version}`);
+                yield exec_1.exec(`bitsadmin /TRANSFER dlinstaller /download /priority foreground ${download_url} ${download_path}`);
+                console.log(`**** Install Unity`);
+                yield exec_1.exec('UnitySetup64.exe /UI=reduced /S');
+            }
+            // Execute
+            const code = yield exec_1.exec(`${unity} -logFile .log` + args, [], exec_opt);
+            if (fs.existsSync('.log'))
+                console.log(fs.readFileSync('.log', 'utf-8'));
             return code;
         });
     }
@@ -50,7 +61,7 @@ class WindowsInstaller {
             // const exec_opt = {failOnStdErr: false, ignoreReturnCode: true, windowsVerbatimArguments: true}
             // const alf = `Unity_v${version}.alf`
             console.log(`**** Create activation file`);
-            this.Execute('-quit -createManualActivationFile');
+            this.Execute('-quit -batchMode -nographics -logfile .log -createManualActivationFile');
             // await exec(`${unity} -quit -batchMode -nographics -logfile -createManualActivationFile`, [], exec_opt);
             // const alf = `Unity_v${version}.alf`
             // console.log(fs.readFileSync('.log', 'utf-8'));
@@ -66,12 +77,15 @@ class WindowsInstaller {
         return __awaiter(this, void 0, void 0, function* () {
             const download_url = "https://beta.unity3d.com/download/" + utility_1.GetId(version) + "/Windows64EditorInstaller/UnitySetup64.exe";
             const download_path = path.resolve('UnitySetup64.exe');
+            const unity = '"C:\\Program Files\\Unity\\Editor\\Unity.exe"';
             // const exec_opt = {failOnStdErr: false, ignoreReturnCode: true, windowsVerbatimArguments: true}
             // const unity = '"C:\\Program Files\\Unity\\Editor\\Unity.exe"';
-            console.log(`**** Download installer`);
-            yield exec_1.exec(`bitsadmin /TRANSFER dlinstaller /download /priority foreground ${download_url} ${download_path}`);
-            console.log(`**** Install`);
-            yield exec_1.exec('UnitySetup64.exe /UI=reduced /S');
+            if (!fs.existsSync(unity)) {
+                console.log(`**** Download installer`);
+                yield exec_1.exec(`bitsadmin /TRANSFER dlinstaller /download /priority foreground ${download_url} ${download_path}`);
+                console.log(`**** Install`);
+                yield exec_1.exec('UnitySetup64.exe /UI=reduced /S');
+            }
             if (!option.ulf) {
                 core_1.setFailed(`Secret '${option.ulfKey}' is undefined.`);
                 yield this.CreateAlf(version);
@@ -79,7 +93,7 @@ class WindowsInstaller {
             }
             console.log(`**** Activate with ulf`);
             fs.writeFileSync('.ulf', option.ulf || '', 'utf-8');
-            const code = yield this.Execute('-quit -manualLicenseFile .ulf');
+            const code = yield this.Execute('-quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf');
             console.log(code);
             // fs.writeFileSync('.ulf', option.ulf || '');
             // const activate_code = await exec(`${unity} -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf`, [], exec_opt);
@@ -89,6 +103,7 @@ class WindowsInstaller {
                 yield this.CreateAlf(version);
                 return;
             }
+            console.log("コマンドーを実行");
             // なんてことだ！
             // 信じられない！
             // 上記のInvoke-WebRequestにすると2018.3.7f1をダウンロードしてくるのだ。

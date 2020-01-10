@@ -38,13 +38,13 @@ export class WindowsInstaller implements Installer {
         fs.writeFileSync('.ulf', option.ulf || '');
         const code = await exec(`${unity} -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf`, [], exec_opt);
         console.log(`manualLicenseFile ${code}`);
-        console.log(fs.readFileSync('.log'));
+        console.log(fs.readFileSync('.log', 'utf-8'));
 
         const actcode = await exec(`${unity} -quit -batchMode -nographics -logfile .log -createManualActivationFile`, [], exec_opt);
         const alf = `Unity_${version}.alf`
-        console.log(fs.readFileSync('.log'));
+        console.log(fs.readFileSync('.log', 'utf-8'));
         console.log(`createManualActivationFile ${actcode} ${alf}`);
-        console.log(`createManualActivationFile ${fs.readFileSync(alf)}`);
+        // console.log(`createManualActivationFile ${fs.readFileSync(alf, 'utf-8')}`);
 
         if(option.ulf)
         {

@@ -40,7 +40,7 @@ export class WindowsInstaller implements Installer {
             await exec(`bitsadmin /TRANSFER dlinstaller /download /priority foreground ${download_url} ${download_path}`);
             
             console.log(`**** Install Unity`);
-            await exec(`UnitySetup64.exe /UI=reduced /S /D="${unity_dir}"`);
+            await exec(`UnitySetup64.exe /UI=reduced /S /D="${unity_dir}"`, [], {windowsVerbatimArguments: true});
         }
 
         // Execute
@@ -52,17 +52,9 @@ export class WindowsInstaller implements Installer {
     }
 
     async CreateAlf(version: string): Promise<void> {
-        // const unity = '"C:\\Program Files\\Unity\\Editor\\Unity.exe"';
-        // const exec_opt = {failOnStdErr: false, ignoreReturnCode: true, windowsVerbatimArguments: true}
-
-        // const alf = `Unity_v${version}.alf`
         console.log(`**** Create activation file`);
         await this.Execute('-quit -batchMode -nographics -createManualActivationFile');
 
-
-        // await exec(`${unity} -quit -batchMode -nographics -logfile -createManualActivationFile`, [], exec_opt);
-        // const alf = `Unity_v${version}.alf`
-        // console.log(fs.readFileSync('.log', 'utf-8'));
         console.log('---- ここから ----');
         console.log(fs.readFileSync(`Unity_v${version}.alf`, 'utf-8'));
         console.log('---- ここまで ----');

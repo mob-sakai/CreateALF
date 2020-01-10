@@ -49,7 +49,7 @@ class WindowsInstaller {
                 console.log(`**** Download Installer for Unity ${this.version}`);
                 yield exec_1.exec(`bitsadmin /TRANSFER dlinstaller /download /priority foreground ${download_url} ${download_path}`);
                 console.log(`**** Install Unity`);
-                yield exec_1.exec(`UnitySetup64.exe /UI=reduced /S /D="${unity_dir}"`);
+                yield exec_1.exec(`UnitySetup64.exe /UI=reduced /S /D="${unity_dir}"`, [], { windowsVerbatimArguments: true });
             }
             // Execute
             const code = yield exec_1.exec(`"${unity_exe}" -logFile .log ` + args, [], exec_opt);
@@ -60,14 +60,8 @@ class WindowsInstaller {
     }
     CreateAlf(version) {
         return __awaiter(this, void 0, void 0, function* () {
-            // const unity = '"C:\\Program Files\\Unity\\Editor\\Unity.exe"';
-            // const exec_opt = {failOnStdErr: false, ignoreReturnCode: true, windowsVerbatimArguments: true}
-            // const alf = `Unity_v${version}.alf`
             console.log(`**** Create activation file`);
             yield this.Execute('-quit -batchMode -nographics -createManualActivationFile');
-            // await exec(`${unity} -quit -batchMode -nographics -logfile -createManualActivationFile`, [], exec_opt);
-            // const alf = `Unity_v${version}.alf`
-            // console.log(fs.readFileSync('.log', 'utf-8'));
             console.log('---- ここから ----');
             console.log(fs.readFileSync(`Unity_v${version}.alf`, 'utf-8'));
             console.log('---- ここまで ----');

@@ -13,7 +13,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        unity-version: [2018.4.0f1]
+        unity-version: [2018.4.15f1]
     
     steps:
     - uses: actions/checkout@v1

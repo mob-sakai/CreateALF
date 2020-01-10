@@ -4,18 +4,20 @@ on:
   push:
     branches:
       - '*'
+  issues:
+    types: [opened, reopened]
 
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     strategy:
       matrix:
         unity-version: [2018.4.12f1]
-
+    
     steps:
-      - name: Echo
-        run: echo $secrets
-        env:
-          secrets: ${{ toJson(secrets) }}
-
+    - uses: actions/checkout@v1
+    - uses: ./
+      with: 
+        unity-version: ${{ matrix.unity-version }}
+        secrets: ${{ toJson(secrets) }}

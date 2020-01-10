@@ -101,7 +101,7 @@ export class WindowsInstaller implements Installer {
         fs.writeFileSync('.ulf', option.ulf || '', 'utf-8');
         const code = await this.Execute('-quit -batchMode -nographics -manualLicenseFile .ulf');
         console.log(code);
-        
+
         const activated = / Next license update check is after /.test(fs.readFileSync('.log', 'utf-8'));
         if(!activated)
         {
@@ -110,7 +110,7 @@ export class WindowsInstaller implements Installer {
             return;
         }
 
-        console.log("コマンドーを実行");
+        console.log("コマンドーを実行" + option.args);
 
         // なんてことだ！
         // 信じられない！

@@ -103,7 +103,7 @@ class WindowsInstaller {
                 yield this.CreateAlf(version);
                 return;
             }
-            console.log("コマンドーを実行");
+            console.log("コマンドーを実行" + option.args);
             // なんてことだ！
             // 信じられない！
             // 上記のInvoke-WebRequestにすると2018.3.7f1をダウンロードしてくるのだ。

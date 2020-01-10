@@ -101,12 +101,9 @@ export class WindowsInstaller implements Installer {
         fs.writeFileSync('.ulf', option.ulf || '', 'utf-8');
         const code = await this.Execute('-quit -batchMode -nographics -manualLicenseFile .ulf');
         console.log(code);
-
-        // fs.writeFileSync('.ulf', option.ulf || '');
-        // const activate_code = await exec(`${unity} -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf`, [], exec_opt);
-        // console.log(fs.readFileSync('.log', 'utf-8'));
-
-        if(code != 0)
+        
+        const activated = / Next license update check is after /.test(fs.readFileSync('.log', 'utf-8'));
+        if(!activated)
         {
             setFailed(`Secret '${option.ulfKey}' is not available.`);
             await this.CreateAlf(version);

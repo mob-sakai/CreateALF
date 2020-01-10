@@ -5,10 +5,10 @@ on:
     branches:
       - '*'
 
-  issues:
-    types: [opened, reopened]
-  pull_request:
-    types: [opened, reopened, closed]
+  # issues:
+  #   types: [opened, reopened]
+  # pull_request:
+  #   types: [opened, reopened, closed]
 
 jobs:
   build:
@@ -18,11 +18,11 @@ jobs:
     strategy:
       matrix:
         unity-version: [2018.4.12f1]
-    
-    - name: Echo secrets
+
+    - name: Echo
       run: echo $secrets
       env:
-        secrets: ${{ toJson(secrets) }}
+        secrets: ${{ secrets.ULF_2017 }}
 
     # - name: Cache Unity License File
     #   id: cache

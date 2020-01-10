@@ -10,8 +10,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const utility_1 = require("../utility");
-const child_process_1 = require("child_process");
+const exec_1 = require("@actions/exec");
+const core_1 = require("@actions/core");
+const fs_1 = require("fs");
 class WindowsInstaller {
+    GetPlatform() {
+        return "WIN";
+    }
     GetId(version) {
         if (this.version === version) {
             if (this.id)
@@ -24,14 +29,30 @@ class WindowsInstaller {
     ExecuteSetUp(version, option) {
         return __awaiter(this, void 0, void 0, function* () {
             const download_url = "https://beta.unity3d.com/download/" + utility_1.GetId(version) + "/Windows64EditorInstaller/UnitySetup64.exe";
-            //await exec.exec('Invoke-WebRequest -Uri ' + download_url + ' -OutFile ./UnitySetup64.exe');
+            yield exec_1.exec('Invoke-WebRequest -Uri ' + download_url + ' -OutFile ./UnitySetup64.exe');
+            yield exec_1.exec('UnitySetup64.exe /UI=reduced /S /D=C:\\Program Files\\Unity');
+            fs_1.writeFileSync('.ulf', option.ulf || '');
+            const code = yield exec_1.exec('C:\\Program Files\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf');
+            console.log(`manualLicenseFile ${code}`);
+            console.log(fs_1.readFileSync('.log'));
+            const actcode = yield exec_1.exec('C:\\Program Files\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile -createManualActivationFile');
+            const alf = `Unity_${version}.alf`;
+            console.log(`createManualActivationFile ${actcode} ${alf}`);
+            console.log(`createManualActivationFile ${fs_1.readFileSync(alf)}`);
+            if (option.ulf) {
+                // writeFileSync('.ulf', option.ulf);
+                // const ret = await exec('C:\\Program Files\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile -manualLicenseFile .ulf');
+            }
+            else {
+                core_1.setFailed(`Secret '${option.ulfKey}' is undefined.`);
+            }
             // なんてことだ！
             // 信じられない！
             // 上記のInvoke-WebRequestにすると2018.3.7f1をダウンロードしてくるのだ。
             // Unity2020を要求しているのにも関わらず！
             // しょうがないからbitsadminする他無い！            
-            child_process_1.execSync('bitsadmin /TRANSFER bj /download /priority foreground ' + download_url + ' %CD%\\UnitySetup64.exe');
-            child_process_1.execSync('UnitySetup64.exe /UI=reduced /S /D=C:\\Program Files\\Unity');
+            // execSync('bitsadmin /TRANSFER bj /download /priority foreground ' + download_url + ' %CD%\\UnitySetup64.exe');
+            // execSync('UnitySetup64.exe /UI=reduced /S /D=C:\\Program Files\\Unity');
         });
     }
 }

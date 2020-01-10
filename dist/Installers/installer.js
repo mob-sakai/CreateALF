@@ -14,14 +14,3 @@ function CreateInstaller() {
     }
 }
 exports.CreateInstaller = CreateInstaller;
-function GetPlatform() {
-    switch (process.platform) {
-        case "darwin":
-            return "MAC";
-        case "win32":
-            return "WIN";
-        default:
-            return "LINUX";
-    }
-}
-exports.GetPlatform = GetPlatform;

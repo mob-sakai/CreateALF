@@ -13,14 +13,3 @@ export function CreateInstaller(): Installer {
             return new LinuxInstaller();
     }
 }
-
-export function GetPlatform(): string {
-    switch (process.platform) {
-        case "darwin":
-            return "MAC";
-        case "win32":
-            return "WIN";
-        default:
-            return "LINUX";
-    }
-}

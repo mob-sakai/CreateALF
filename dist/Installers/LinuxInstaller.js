@@ -29,6 +29,9 @@ class LinuxInstaller {
     constructor() {
         this.key = 'll';
     }
+    GetPlatform() {
+        return "LINUX";
+    }
     GetId(version) {
         if (this.version === version) {
             if (this.id)

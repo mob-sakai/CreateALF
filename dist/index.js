@@ -14,8 +14,8 @@ const core_1 = require("@actions/core");
 function Run() {
     return __awaiter(this, void 0, void 0, function* () {
         const version = core_1.getInput("unity-version", { required: true });
-        const ulfKey = `ULF_${installer_1.GetPlatform()}_${version.split('.')[0]}`;
         const unityInstaller = installer_1.CreateInstaller();
+        const ulfKey = `ULF_${unityInstaller.GetPlatform()}_${version.split('.')[0]}`;
         core_1.setOutput("id", unityInstaller.GetId(version));
         const option = {
             "has-android": core_1.getInput("has-android", { required: false }),
@@ -30,7 +30,7 @@ function Run() {
         console.log(process.platform);
         console.log(option.ulfKey);
         console.log(option.ulf);
-        // await unityInstaller.ExecuteSetUp(version, option);
+        yield unityInstaller.ExecuteSetUp(version, option);
     });
 }
 Run();

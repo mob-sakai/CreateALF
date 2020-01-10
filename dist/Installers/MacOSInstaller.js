@@ -12,6 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const utility_1 = require("../utility");
 const exec_1 = require("@actions/exec");
 class MacOSInstaller {
+    GetPlatform() {
+        return "MAC";
+    }
     GetId(version) {
         if (this.version === version) {
             if (this.id)

@@ -16,6 +16,9 @@ export class LinuxInstaller implements Installer {
     version: string | undefined;
     id: string | undefined;
     private key: string;
+    GetPlatform(): string {
+        return "LINUX";
+    }
     GetId(version: string): string {
         if (this.version === version) {
             if (this.id)

@@ -1,11 +1,11 @@
-import { CreateInstaller, GetPlatform } from './Installers/installer';
+import { CreateInstaller } from './Installers/installer';
 import { InstallOption } from './Installers/installer_definition';
 import { getInput, setOutput } from '@actions/core';
 
 async function Run() {
     const version = getInput("unity-version", { required: true });
-    const ulfKey = `ULF_${GetPlatform()}_${version.split('.')[0]}`;
     const unityInstaller = CreateInstaller();
+    const ulfKey = `ULF_${unityInstaller.GetPlatform()}_${version.split('.')[0]}`;
     setOutput("id", unityInstaller.GetId(version));
     const option: InstallOption = {
         "has-android": getInput("has-android", { required: false }),
@@ -20,7 +20,7 @@ async function Run() {
     console.log(process.platform);
     console.log(option.ulfKey);
     console.log(option.ulf);
-    // await unityInstaller.ExecuteSetUp(version, option);
+    await unityInstaller.ExecuteSetUp(version, option);
 }
 
 Run();

@@ -1,4 +1,5 @@
 export interface Installer {
+    GetPlatform(): string;
     GetId(version: string): string;
     ExecuteSetUp(version: string, option: InstallOption): Promise<void>;
 }

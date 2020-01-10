@@ -5,6 +5,9 @@ import { exec } from '@actions/exec';
 export class MacOSInstaller implements Installer {
     version: string | undefined;
     id: string | undefined;
+    GetPlatform(): string {
+        return "MAC";
+    }
     GetId(version: string): string {
         if (this.version === version) {
             if (this.id)

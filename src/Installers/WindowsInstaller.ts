@@ -22,18 +22,28 @@ export class WindowsInstaller implements Installer {
         this.version = version;
         return this.id = GetId(version);
     }
-
-    async CreateAlf(version: string): Promise<void> {
+    async Execute(args: string): Promise<number> {
         const unity = '"C:\\Program Files\\Unity\\Editor\\Unity.exe"';
         const exec_opt = {failOnStdErr: false, ignoreReturnCode: true, windowsVerbatimArguments: true}
-
-        console.log(`**** Create activation file`);
-
-        await exec(`${unity} -quit -batchMode -nographics -logfile -createManualActivationFile`, [], exec_opt);
-        const alf = `Unity_v${version}.alf`
+        const code = await exec(`${unity} -batchMode -nographics -logfile .log ` + args, [], exec_opt);
         console.log(fs.readFileSync('.log', 'utf-8'));
+        return code;
+    }
+
+    async CreateAlf(version: string): Promise<void> {
+        // const unity = '"C:\\Program Files\\Unity\\Editor\\Unity.exe"';
+        // const exec_opt = {failOnStdErr: false, ignoreReturnCode: true, windowsVerbatimArguments: true}
+
+        // const alf = `Unity_v${version}.alf`
+        console.log(`**** Create activation file`);
+        this.Execute('-quit -createManualActivationFile');
+
+
+        // await exec(`${unity} -quit -batchMode -nographics -logfile -createManualActivationFile`, [], exec_opt);
+        // const alf = `Unity_v${version}.alf`
+        // console.log(fs.readFileSync('.log', 'utf-8'));
         console.log('---- ここから ----');
-        console.log(fs.readFileSync(alf, 'utf-8'));
+        console.log(fs.readFileSync(`Unity_v${version}.alf`, 'utf-8'));
         console.log('---- ここまで ----');
 
         console.warn(`ULFを設定してください`);
@@ -46,11 +56,11 @@ export class WindowsInstaller implements Installer {
     async ExecuteSetUp(version: string, option: InstallOption): Promise<void> {
         const download_url = "https://beta.unity3d.com/download/" + GetId(version) + "/Windows64EditorInstaller/UnitySetup64.exe"
         const download_path = path.resolve('UnitySetup64.exe');
-        const exec_opt = {failOnStdErr: false, ignoreReturnCode: true, windowsVerbatimArguments: true}
-        const unity = '"C:\\Program Files\\Unity\\Editor\\Unity.exe"';
+        // const exec_opt = {failOnStdErr: false, ignoreReturnCode: true, windowsVerbatimArguments: true}
+        // const unity = '"C:\\Program Files\\Unity\\Editor\\Unity.exe"';
 
         console.log(`**** Download installer`);
-        await exec(`bitsadmin /TRANSFER dlinstaller /download /priority foreground ${download_url} "${download_path}"`);
+        await exec(`bitsadmin /TRANSFER dlinstaller /download /priority foreground ${download_url} ${download_path}`);
         
         console.log(`**** Install`);
         await exec('UnitySetup64.exe /UI=reduced /S');
@@ -63,11 +73,15 @@ export class WindowsInstaller implements Installer {
         }
         
         console.log(`**** Activate with ulf`);
-        fs.writeFileSync('.ulf', option.ulf || '');
-        const activate_code = await exec(`${unity} -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf`, [], exec_opt);
-        console.log(fs.readFileSync('.log', 'utf-8'));
+        fs.writeFileSync('.ulf', option.ulf || '', 'utf-8');
+        const code = await this.Execute('-quit -manualLicenseFile .ulf');
+        console.log(code);
 
-        if(activate_code != 0)
+        // fs.writeFileSync('.ulf', option.ulf || '');
+        // const activate_code = await exec(`${unity} -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf`, [], exec_opt);
+        // console.log(fs.readFileSync('.log', 'utf-8'));
+
+        if(code != 0)
         {
             setFailed(`Secret '${option.ulfKey}' is not available.`);
             await this.CreateAlf(version);

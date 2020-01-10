@@ -39,14 +39,18 @@ class WindowsInstaller {
         return __awaiter(this, void 0, void 0, function* () {
             const download_url = "https://beta.unity3d.com/download/" + utility_1.GetId(version) + "/Windows64EditorInstaller/UnitySetup64.exe";
             const download_path = path.resolve('UnitySetup64.exe');
+            const exec_opt = { failOnStdErr: false };
             // const _testExecOptions = getExecOptions()
-            yield exec_1.exec(`bitsadmin /TRANSFER dlinstaller /download /priority foreground ${download_url} "${download_path}"`, [], { failOnStdErr: false });
-            yield exec_1.exec('UnitySetup64.exe /UI=reduced /S /D=C:\\Program Files\\Unity');
+            console.log(`**** Download installer`);
+            yield exec_1.exec(`bitsadmin /TRANSFER dlinstaller /download /priority foreground ${download_url} "${download_path}"`);
+            console.log(`**** Install`);
+            yield exec_1.exec('UnitySetup64.exe /UI=reduced /S');
+            console.log(`**** Activate with ulf`);
             fs.writeFileSync('.ulf', option.ulf || '');
-            const code = yield exec_1.exec('C:\\Program Files\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf');
+            const code = yield exec_1.exec('C:\\Program Files\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf', [], exec_opt);
             console.log(`manualLicenseFile ${code}`);
             console.log(fs.readFileSync('.log'));
-            const actcode = yield exec_1.exec('"C:\\Program Files\\Unity\\Editor\\Unity.exe" -quit -batchMode -nographics -logfile -createManualActivationFile');
+            const actcode = yield exec_1.exec('C:\\Program\ Files\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile -createManualActivationFile');
             const alf = `Unity_${version}.alf`;
             console.log(`createManualActivationFile ${actcode} ${alf}`);
             console.log(`createManualActivationFile ${fs.readFileSync(alf)}`);

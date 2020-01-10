@@ -61,7 +61,7 @@ class WindowsInstaller {
             // const exec_opt = {failOnStdErr: false, ignoreReturnCode: true, windowsVerbatimArguments: true}
             // const alf = `Unity_v${version}.alf`
             console.log(`**** Create activation file`);
-            this.Execute('-quit -batchMode -nographics -logfile .log -createManualActivationFile');
+            yield this.Execute('-quit -batchMode -nographics -logfile .log -createManualActivationFile');
             // await exec(`${unity} -quit -batchMode -nographics -logfile -createManualActivationFile`, [], exec_opt);
             // const alf = `Unity_v${version}.alf`
             // console.log(fs.readFileSync('.log', 'utf-8'));
@@ -75,17 +75,18 @@ class WindowsInstaller {
     }
     ExecuteSetUp(version, option) {
         return __awaiter(this, void 0, void 0, function* () {
-            const download_url = "https://beta.unity3d.com/download/" + utility_1.GetId(version) + "/Windows64EditorInstaller/UnitySetup64.exe";
-            const download_path = path.resolve('UnitySetup64.exe');
-            const unity = '"C:\\Program Files\\Unity\\Editor\\Unity.exe"';
+            // const download_url = "https://beta.unity3d.com/download/" + GetId(version) + "/Windows64EditorInstaller/UnitySetup64.exe"
+            // const download_path = path.resolve('UnitySetup64.exe');
+            // const unity = '"C:\\Program Files\\Unity\\Editor\\Unity.exe"';
             // const exec_opt = {failOnStdErr: false, ignoreReturnCode: true, windowsVerbatimArguments: true}
             // const unity = '"C:\\Program Files\\Unity\\Editor\\Unity.exe"';
-            if (!fs.existsSync(unity)) {
-                console.log(`**** Download installer`);
-                yield exec_1.exec(`bitsadmin /TRANSFER dlinstaller /download /priority foreground ${download_url} ${download_path}`);
-                console.log(`**** Install`);
-                yield exec_1.exec('UnitySetup64.exe /UI=reduced /S');
-            }
+            // if(!fs.existsSync(unity))
+            // {
+            //     console.log(`**** Download installer`);
+            //     await exec(`bitsadmin /TRANSFER dlinstaller /download /priority foreground ${download_url} ${download_path}`);
+            //     console.log(`**** Install`);
+            //     await exec('UnitySetup64.exe /UI=reduced /S');
+            // }
             if (!option.ulf) {
                 core_1.setFailed(`Secret '${option.ulfKey}' is undefined.`);
                 yield this.CreateAlf(version);

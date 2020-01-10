@@ -54,7 +54,7 @@ export class WindowsInstaller implements Installer {
 
         // const alf = `Unity_v${version}.alf`
         console.log(`**** Create activation file`);
-        this.Execute('-quit -batchMode -nographics -logfile .log -createManualActivationFile');
+        await this.Execute('-quit -batchMode -nographics -logfile .log -createManualActivationFile');
 
 
         // await exec(`${unity} -quit -batchMode -nographics -logfile -createManualActivationFile`, [], exec_opt);

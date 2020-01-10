@@ -25,11 +25,9 @@ function Run() {
             "has-webgl": core_1.getInput("has-webgl", { required: false }),
             "has-windows-mono": core_1.getInput("has-windows-mono", { required: false }),
             "ulfKey": ulfKey,
-            "ulf": JSON.parse(core_1.getInput("secrets", { required: false }))[ulfKey],
+            "ulf": JSON.parse(core_1.getInput("secrets", { required: true }))[ulfKey],
+            "args": core_1.getInput("args", { required: true }),
         };
-        console.log(process.platform);
-        console.log(option.ulfKey);
-        console.log(option.ulf);
         yield unityInstaller.ExecuteSetUp(version, option);
     });
 }

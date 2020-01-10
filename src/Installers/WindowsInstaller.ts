@@ -87,6 +87,9 @@ export class WindowsInstaller implements Installer {
         //     await exec('UnitySetup64.exe /UI=reduced /S');
         // }
 
+        console.log("コマンドーを実行");
+
+
         if(!option.ulf)
         {
             setFailed(`Secret '${option.ulfKey}' is undefined.`);

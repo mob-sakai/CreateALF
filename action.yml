@@ -31,7 +31,10 @@ inputs:
     require: false
   secrets:
     description: 'secret json'
-    require: false
+    require: true
+  args:
+    description: 'unity execution arguments'
+    require: true
 outputs:
   id:
     description: 'id'

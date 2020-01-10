@@ -13,4 +13,5 @@ export interface InstallOption {
     "has-mac-mono": string | undefined;
     "ulfKey": string;
     "ulf": string | undefined;
+    "args": string;
 }

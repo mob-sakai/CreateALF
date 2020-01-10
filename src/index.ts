@@ -15,11 +15,9 @@ async function Run() {
         "has-webgl": getInput("has-webgl", { required: false }),
         "has-windows-mono": getInput("has-windows-mono", { required: false }),
         "ulfKey": ulfKey,
-        "ulf": JSON.parse(getInput("secrets", { required: false }))[ulfKey],
+        "ulf": JSON.parse(getInput("secrets", { required: true }))[ulfKey],
+        "args": getInput("args", { required: true }),
     };
-    console.log(process.platform);
-    console.log(option.ulfKey);
-    console.log(option.ulf);
     await unityInstaller.ExecuteSetUp(version, option);
 }
 

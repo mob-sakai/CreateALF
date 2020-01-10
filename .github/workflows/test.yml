@@ -21,3 +21,4 @@ jobs:
       with: 
         unity-version: ${{ matrix.unity-version }}
         secrets: ${{ toJson(secrets) }}
+        args: 'hogehoge'

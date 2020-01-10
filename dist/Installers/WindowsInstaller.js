@@ -35,6 +35,22 @@ class WindowsInstaller {
         this.version = version;
         return this.id = utility_1.GetId(version);
     }
+    CreateAlf(version) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const unity = '"C:\\Program Files\\Unity\\Editor\\Unity.exe"';
+            const exec_opt = { failOnStdErr: false, ignoreReturnCode: true, windowsVerbatimArguments: true };
+            console.log(`**** Create activation file`);
+            yield exec_1.exec(`${unity} -quit -batchMode -nographics -logfile -createManualActivationFile`, [], exec_opt);
+            const alf = `Unity_v${version}.alf`;
+            console.log(fs.readFileSync('.log', 'utf-8'));
+            console.log('---- ここから ----');
+            console.log(fs.readFileSync(alf, 'utf-8'));
+            console.log('---- ここまで ----');
+            console.warn(`ULFを設定してください`);
+            console.warn(`設定方法`);
+            console.warn(`なんやかんや`);
+        });
+    }
     ExecuteSetUp(version, option) {
         return __awaiter(this, void 0, void 0, function* () {
             const download_url = "https://beta.unity3d.com/download/" + utility_1.GetId(version) + "/Windows64EditorInstaller/UnitySetup64.exe";
@@ -45,23 +61,19 @@ class WindowsInstaller {
             yield exec_1.exec(`bitsadmin /TRANSFER dlinstaller /download /priority foreground ${download_url} "${download_path}"`);
             console.log(`**** Install`);
             yield exec_1.exec('UnitySetup64.exe /UI=reduced /S');
+            if (!option.ulf) {
+                core_1.setFailed(`Secret '${option.ulfKey}' is undefined.`);
+                yield this.CreateAlf(version);
+                return;
+            }
             console.log(`**** Activate with ulf`);
             fs.writeFileSync('.ulf', option.ulf || '');
-            const code = yield exec_1.exec(`${unity} -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf`, [], exec_opt);
-            console.log(`manualLicenseFile ${code}`);
+            const activate_code = yield exec_1.exec(`${unity} -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf`, [], exec_opt);
             console.log(fs.readFileSync('.log', 'utf-8'));
-            const actcode = yield exec_1.exec(`${unity} -quit -batchMode -nographics -logfile .log -createManualActivationFile`, [], exec_opt);
-            const alf = `Unity_${version}.alf`;
-            console.log(fs.readFileSync('.log', 'utf-8'));
-            console.log(`createManualActivationFile ${actcode} ${alf}`);
-            // console.log(`createManualActivationFile ${fs.readFileSync(alf, 'utf-8')}`);
-            if (option.ulf) {
-                // writeFileSync('.ulf', option.ulf);
-                // const ret = await exec('C:\\Program Files\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile -manualLicenseFile .ulf');
-            }
-            else {
-                console.log(`**** Create activation file`);
-                core_1.setFailed(`Secret '${option.ulfKey}' is undefined.`);
+            if (activate_code != 0) {
+                core_1.setFailed(`Secret '${option.ulfKey}' is not available.`);
+                yield this.CreateAlf(version);
+                return;
             }
             // なんてことだ！
             // 信じられない！

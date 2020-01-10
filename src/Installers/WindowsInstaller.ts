@@ -22,6 +22,27 @@ export class WindowsInstaller implements Installer {
         this.version = version;
         return this.id = GetId(version);
     }
+
+    async CreateAlf(version: string): Promise<void> {
+        const unity = '"C:\\Program Files\\Unity\\Editor\\Unity.exe"';
+        const exec_opt = {failOnStdErr: false, ignoreReturnCode: true, windowsVerbatimArguments: true}
+
+        console.log(`**** Create activation file`);
+
+        await exec(`${unity} -quit -batchMode -nographics -logfile -createManualActivationFile`, [], exec_opt);
+        const alf = `Unity_v${version}.alf`
+        console.log(fs.readFileSync('.log', 'utf-8'));
+        console.log('---- ここから ----');
+        console.log(fs.readFileSync(alf, 'utf-8'));
+        console.log('---- ここまで ----');
+
+        console.warn(`ULFを設定してください`);
+        console.warn(`設定方法`);
+        console.warn(`なんやかんや`);
+    }
+
+
+
     async ExecuteSetUp(version: string, option: InstallOption): Promise<void> {
         const download_url = "https://beta.unity3d.com/download/" + GetId(version) + "/Windows64EditorInstaller/UnitySetup64.exe"
         const download_path = path.resolve('UnitySetup64.exe');
@@ -34,30 +55,23 @@ export class WindowsInstaller implements Installer {
         console.log(`**** Install`);
         await exec('UnitySetup64.exe /UI=reduced /S');
 
+        if(!option.ulf)
+        {
+            setFailed(`Secret '${option.ulfKey}' is undefined.`);
+            await this.CreateAlf(version);
+            return;
+        }
+        
         console.log(`**** Activate with ulf`);
         fs.writeFileSync('.ulf', option.ulf || '');
-        const code = await exec(`${unity} -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf`, [], exec_opt);
-        console.log(`manualLicenseFile ${code}`);
+        const activate_code = await exec(`${unity} -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf`, [], exec_opt);
         console.log(fs.readFileSync('.log', 'utf-8'));
 
-        const actcode = await exec(`${unity} -quit -batchMode -nographics -logfile .log -createManualActivationFile`, [], exec_opt);
-        const alf = `Unity_${version}.alf`
-        console.log(fs.readFileSync('.log', 'utf-8'));
-        console.log(`createManualActivationFile ${actcode} ${alf}`);
-        // console.log(`createManualActivationFile ${fs.readFileSync(alf, 'utf-8')}`);
-
-        if(option.ulf)
+        if(activate_code != 0)
         {
-            // writeFileSync('.ulf', option.ulf);
-            // const ret = await exec('C:\\Program Files\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile -manualLicenseFile .ulf');
-
-
-        }
-        else
-        {
-        console.log(`**** Create activation file`);
-        setFailed(`Secret '${option.ulfKey}' is undefined.`);
-
+            setFailed(`Secret '${option.ulfKey}' is not available.`);
+            await this.CreateAlf(version);
+            return;
         }
 
         // なんてことだ！

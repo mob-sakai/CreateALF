@@ -5,16 +5,10 @@ on:
     branches:
       - '*'
 
-  # issues:
-  #   types: [opened, reopened]
-  # pull_request:
-  #   types: [opened, reopened, closed]
-
 jobs:
   build:
 
     runs-on: ubuntu-latest
-    # container: docker://gableroux/unity3d:${{ matrix.unity-version }}
     strategy:
       matrix:
         unity-version: [2018.4.12f1]
@@ -22,114 +16,5 @@ jobs:
     - name: Echo
       run: echo $secrets
       env:
-        secrets: ${{ secrets.ULF_2017 }}
+        SEC: ${{ secrets.ULF_2017 }}
 
-    # - name: Cache Unity License File
-    #   id: cache
-    #   uses: actions/cache@v1
-    #   with:
-    #     path: .ulf
-    #     key: ${{ matrix.unity-version }}.ulf
-
-    # - name: Echo secrets　ULF
-    #   run: |
-    #     ULF=ULF_`echo ${{ matrix.unity-version }} | tr '.' '\n' | head -n 1`
-    #     if [[ -n ${!ULF} ]]; then
-    #       echo "${ULF} あるで"
-    #     else
-    #       echo "${ULF} ないで"
-    #     fi
-    #   env:
-    #     ULF_2017: ${{ secrets.ULF_2017 }}
-    #     ULF_2018: ${{ secrets.ULF_2018 }}
-    
-
-    # - name: Unity
-    #   run: |
-    #     set -x
-    #     set +e
-    #     apt -y update
-    #     apt -y install jq
-
-    #     NAME=ULF_`echo ${{ matrix.unity-version }} | tr '.' '\n' | head -n 1`
-    #     JSON=$(cat << EOS
-    #     ${{ toJson(secrets) }}
-    #     EOS
-    #     )
-
-    #     ULF=`echo $JSON | jq .$NAME`
-    #     if [[ "$NAME" != "null" ]]; then
-    #       echo $NAME
-    #     fi
-    #     if [[ "$ULF" != "null" ]]; then
-    #       echo "$NAME あるで"
-    #       echo $ULF > temp.ulf
-    #       /opt/Unity/Editor/Unity -manualLicenseFile temp.ulf -batchmode -nographics -quit
-    #       echo "ライセンス有効化しといたで"
-    #       exit 0
-    #     else
-    #       echo "$NAME ないで"
-    #       /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile
-    #       mkdir .alf && mv Unity_v${{ matrix.unity-version }}.alf .alf
-    #       echo "ALF吐き出しといた。artifactsからダウンロードして、手動でulfに変換、secretsに追加してクレメンス！"
-    #       exit 1
-    #     fi
-
-    # - name: (OPTION)upload-alf
-    #   if: failure()
-    #   uses: actions/upload-artifact@v1
-    #   with:
-    #     name: Unity_v${{ matrix.unity-version }}.alf
-    #     path: .alf
-
-    # - name: ULF_2018
-    #   if: secrets.ULF_2018 != 0
-    #   run: echo ULF_2018 is exist
-
-    # - name: ULF_2017
-    #   if: secrets.ULF_2017
-    #   run: echo ULF_2017 is exist
-
-    # - name: Create Manual Activation File
-    #   if: steps.cache.outputs.cache-hit != 'true'
-    #   run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -logfile -createManualActivationFile || exit 0
-
-    # - name: Activate Unity License File With Puppeteer
-    #   uses: ianwalter/puppeteer@v2.0.0
-    #   with:
-    #     args: npm i && node activate.js ${{ secrets.UNITY_USER_MAIL }} ${{ secrets.UNITY_USER_PASSWORD }} Unity_v${{ matrix.unity-version }}.alf
-
-    # - name: Setup node
-    #   uses: actions/setup-node@v1.2.0
-    #   with:
-    #     node-version: 12
-    
-    # - name: Activate Unity License File With Puppeteer
-    #   run: |
-    #     apt-get update
-    #     apt-get install -yq libgconf-2-4
-    #     apt-get install -y wget --no-install-recommends
-    #     wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-    #     sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
-    #     apt-get update
-    #     apt-get install -y google-chrome-unstable --no-install-recommends
-    #     rm -rf /var/lib/apt/lists/*
-    #     npm i
-    #     node activate.js ${{ secrets.UNITY_USER_MAIL }} ${{ secrets.UNITY_USER_PASSWORD }} Unity_v${{ matrix.unity-version }}.alf
-    #   env:
-    #     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
-
-
-    # - name: Activate Unity License File
-    #   if: steps.cache.outputs.cache-hit != 'true'
-    #   run: npm i && node activate.js ${{ secrets.UNITY_USER_MAIL }} ${{ secrets.UNITY_USER_PASSWORD }} Unity_v${{ matrix.unity-version }}.alf
-
-    # - name: (OPTION)upload-artifact
-    #   uses: actions/upload-artifact@v1
-    #   with:
-    #     name: ${{ matrix.unity-version }}
-    #     path: Unity_v*.ulf
-
-    # - name: Move Unity License File To Cache
-    #   if: steps.cache.outputs.cache-hit != 'true'
-    #   run: mkdir .ulf && mv Unity_v*.ulf .ulf/ulf

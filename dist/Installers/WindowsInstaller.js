@@ -8,11 +8,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const utility_1 = require("../utility");
+// import { execSync } from 'child_process';
 const exec_1 = require("@actions/exec");
 const core_1 = require("@actions/core");
-const fs_1 = require("fs");
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
 class WindowsInstaller {
     GetPlatform() {
         return "WIN";
@@ -29,16 +38,17 @@ class WindowsInstaller {
     ExecuteSetUp(version, option) {
         return __awaiter(this, void 0, void 0, function* () {
             const download_url = "https://beta.unity3d.com/download/" + utility_1.GetId(version) + "/Windows64EditorInstaller/UnitySetup64.exe";
-            yield exec_1.exec(`bitsadmin /TRANSFER bj /download /priority foreground ${download_url} %CD%\\UnitySetup64.exe`);
+            const download_path = path.resolve('UnitySetup64.exe');
+            yield exec_1.exec(`bitsadmin /TRANSFER dlinstaller /download /priority foreground ${download_url} "${download_path}"`);
             yield exec_1.exec('UnitySetup64.exe /UI=reduced /S /D=C:\\Program Files\\Unity');
-            fs_1.writeFileSync('.ulf', option.ulf || '');
+            fs.writeFileSync('.ulf', option.ulf || '');
             const code = yield exec_1.exec('C:\\Program Files\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile .log -manualLicenseFile .ulf');
             console.log(`manualLicenseFile ${code}`);
-            console.log(fs_1.readFileSync('.log'));
+            console.log(fs.readFileSync('.log'));
             const actcode = yield exec_1.exec('C:\\Program Files\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile -createManualActivationFile');
             const alf = `Unity_${version}.alf`;
             console.log(`createManualActivationFile ${actcode} ${alf}`);
-            console.log(`createManualActivationFile ${fs_1.readFileSync(alf)}`);
+            console.log(`createManualActivationFile ${fs.readFileSync(alf)}`);
             if (option.ulf) {
                 // writeFileSync('.ulf', option.ulf);
                 // const ret = await exec('C:\\Program Files\\Unity\\Editor\\Unity.exe -quit -batchMode -nographics -logfile -manualLicenseFile .ulf');

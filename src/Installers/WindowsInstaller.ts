@@ -24,7 +24,7 @@ export class WindowsInstaller implements Installer {
     }
     
     async Execute(args: string): Promise<number> {
-        const unity = '"C:\\Program Files\\Unity\\Editor\\Unity.exe"';
+        const unity = 'C:\\Program Files\\Unity\\Editor\\Unity.exe';
         const exec_opt = {failOnStdErr: false, ignoreReturnCode: true, windowsVerbatimArguments: true}
 
         // Install
@@ -41,7 +41,7 @@ export class WindowsInstaller implements Installer {
         }
 
         // Execute
-        const code = await exec(`${unity} -logFile .log ` + args, [], exec_opt);
+        const code = await exec(`"${unity}" -logFile .log ` + args, [], exec_opt);
         if(fs.existsSync('.log'))
             console.log(fs.readFileSync('.log', 'utf-8'));
 

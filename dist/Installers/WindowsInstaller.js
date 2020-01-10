@@ -37,7 +37,7 @@ class WindowsInstaller {
     }
     Execute(args) {
         return __awaiter(this, void 0, void 0, function* () {
-            const unity = '"C:\\Program Files\\Unity\\Editor\\Unity.exe"';
+            const unity = 'C:\\Program Files\\Unity\\Editor\\Unity.exe';
             const exec_opt = { failOnStdErr: false, ignoreReturnCode: true, windowsVerbatimArguments: true };
             // Install
             if (!fs.existsSync(unity)) {
@@ -49,7 +49,7 @@ class WindowsInstaller {
                 yield exec_1.exec('UnitySetup64.exe /UI=reduced /S');
             }
             // Execute
-            const code = yield exec_1.exec(`${unity} -logFile .log ` + args, [], exec_opt);
+            const code = yield exec_1.exec(`"${unity}" -logFile .log ` + args, [], exec_opt);
             if (fs.existsSync('.log'))
                 console.log(fs.readFileSync('.log', 'utf-8'));
             return code;

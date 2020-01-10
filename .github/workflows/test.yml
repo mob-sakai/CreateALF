@@ -13,8 +13,9 @@ jobs:
       matrix:
         unity-version: [2018.4.12f1]
 
-    - name: Echo
-      run: echo $secrets
-      env:
-        SEC: ${{ secrets.ULF_2017 }}
+    steps:
+      - name: Echo
+        run: echo $secrets
+        env:
+          secrets: ${{ secrets.ULF_2017 }}
 

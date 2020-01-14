@@ -52,16 +52,16 @@ function Run() {
         const args = "";
         const u = new Unity(version_, modules);
         const secrets = JSON.parse(core_1.getInput("secrets", { required: true }));
-        // const ulf = JSON.parse(getInput("secrets", { required: true }))[u.ulfKey];
-        // const token = JSON.parse(getInput("secrets", { required: true }))[];
-        const octokit = new github.GitHub(secrets['GITHUB_TOKEN'] || '');
-        const rr = yield octokit.issues.create(Object.assign(Object.assign({}, github.context.repo), { title: 'hogehoge!!!', body: 'fugauga!!!' }));
-        console.log(rr.data);
+        yield u.createAlfIssue("thisisalf", secrets["GITHUB_TOKEN"] || "");
         return;
         yield u.install();
-        if (yield u.activate(secrets[u.ulfKey], secrets['GITHUB_TOKEN'])) {
+        if (yield u.activate(secrets[u.ulfKey])) {
             yield u.run(project_path, args);
             yield u.deactivate();
+        }
+        else {
+            const alf = yield u.createAlf();
+            yield u.createAlfIssue(alf, secrets["GITHUB_TOKEN"] || "");
         }
     });
 }
@@ -116,12 +116,11 @@ class Unity {
             }
         });
     }
-    activate(ulf, token) {
+    activate(ulf) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!ulf) {
                 console.log("ulfがない");
                 core.setFailed(`Secret '${this.ulfKey}' is undefined.`);
-                yield this.createAlf(token);
                 return false;
             }
             console.log("マニュアルアクティベート実行");
@@ -132,14 +131,13 @@ class Unity {
             if (!/ Next license update check is after /.test(log)) {
                 console.log("アクティベートに失敗");
                 core.setFailed(`Secret is not available.`);
-                yield this.createAlf(token);
                 return false;
             }
             console.log("マニュアルアクティベート終了");
             return true;
         });
     }
-    createAlf(token) {
+    createAlf() {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.u3dRun(`-createManualActivationFile -logFile .log`);
             console.log(fs.readFileSync(".log", "utf-8"));
@@ -147,8 +145,28 @@ class Unity {
             console.log("---- ここから ----");
             console.log(fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8"));
             console.log("---- ここまで ----");
-            const octokit = new github.GitHub(token || '');
-            const rr = yield octokit.issues.create(Object.assign(Object.assign({}, github.context.repo), { title: 'hogehoge!!!', body: 'fugauga!!!' }));
+            return fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8");
+        });
+    }
+    createAlfIssue(alf, token) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log(github.context);
+            const octokit = new github.GitHub(token || "");
+            const title = `[Actions] Secret '${this.ulfKey}' has been requestd`;
+            const body = `Secret '${this.ulfKey}' has been requestd by workflow '${github.context.workflow}'\n\n
+### 1. 以下のテキストを \`Unity_v${this.version}.alf\` として保存する.\n\n
+\`\`\`
+${alf}
+\`\`\`
+\n\n
+### 2. 以下のページでマニュアルアクティベートし、ulfをダウンロードする.\n\n
+https://license.unity3d.com/manual
+\n\n
+### 3. リポジトリのSecretに'${this.ulfKey}'を追加/更新する.\n\n
+URL
+    `;
+            const rr = yield octokit.issues.create(Object.assign(Object.assign({}, github.context.repo), { title,
+                body }));
             console.log(rr.data);
         });
     }

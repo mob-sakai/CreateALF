@@ -31,7 +31,7 @@ class Unity {
     u3d(args) {
         return __awaiter(this, void 0, void 0, function* () {
             const exe = process.platform == "win32" ? "u3d.bat" : "u3d";
-            return exec.exec(`${exe} ${args}`, [], {
+            return exec.exec(`${exe} -t --verbose ${args}`, [], {
                 failOnStdErr: false,
                 ignoreReturnCode: true,
                 windowsVerbatimArguments: true
@@ -73,6 +73,7 @@ class Unity {
             fs.writeFileSync(".ulf", (ulf || "").replace('\r', ''), "utf-8");
             yield this.u3dRun(`-manualLicenseFile .ulf`, 'activate.log');
             console.log(fs.readFileSync("activate.log", "utf-8"));
+            yield this.u3d(`licenses`);
             const log = fs.readFileSync("activate.log", "utf-8");
             if (!/ Next license update check is after /.test(log)) {
                 return false;

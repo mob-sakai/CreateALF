@@ -16,7 +16,7 @@ export class Unity {
 
   async u3d(args: string): Promise<number> {
     const exe = process.platform == "win32" ? "u3d.bat" : "u3d";
-    return exec.exec(`${exe} ${args}`, [], {
+    return exec.exec(`${exe} -t --verbose ${args}`, [], {
       failOnStdErr: false,
       ignoreReturnCode: true,
       windowsVerbatimArguments: true
@@ -61,6 +61,8 @@ export class Unity {
     fs.writeFileSync(".ulf", (ulf || "").replace('\r', ''), "utf-8");
     await this.u3dRun(`-manualLicenseFile .ulf`, 'activate.log');
     console.log(fs.readFileSync("activate.log", "utf-8"));
+
+    await this.u3d(`licenses`);
 
     const log = fs.readFileSync("activate.log", "utf-8");
     if (!/ Next license update check is after /.test(log)) {

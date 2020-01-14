@@ -21,7 +21,7 @@ inputs:
     description: '[Required] Secret json to activate Unity Editor.'
     require: false
     default: |
-    '{
+    "{
       ULF_WIN_2017: ${{ secret.ULF_WIN_2017 }},
       ULF_WIN_2018: ${{ secret.ULF_WIN_2018 }},
       ULF_WIN_2019: ${{ secret.ULF_WIN_2019 }},
@@ -42,7 +42,7 @@ inputs:
       ULF_LINUX_2020: ${{ secret.ULF_LINUX_2020 }},
       ULF_LINUX_2021: ${{ secret.ULF_LINUX_2021 }},
       ULF_LINUX_2022: ${{ secret.ULF_LINUX_2022 }},
-    }'
+    }"
 outputs: {}
 runs:
   using: 'node12'

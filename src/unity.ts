@@ -21,11 +21,13 @@ export class Unity {
     });
   }
 
-  async u3dRun(args: string, quit: boolean = true): Promise<number> {
+  async u3dRun(args: string, log: string, quit: boolean = true): Promise<number> {
     const q = quit ? "-quit" : "";
-    return this.u3d(
-      `-u ${this.version} -- ${q} -batchmode -nographics -logFile .log ${args}`
+    const exitCode = await this.u3d(
+      `-u ${this.version} -- ${q} -batchmode -nographics -logFile ${log} ${args}`
     );
+
+    return exitCode;
   }
 
   async gem(args: string) {
@@ -55,10 +57,10 @@ export class Unity {
     }
 
     fs.writeFileSync(".ulf", ulf || "", "utf-8");
-    await this.u3dRun(`-manualLicenseFile .ulf -logFile .log`);
-    console.log(fs.readFileSync(".log", "utf-8"));
+    await this.u3dRun(`-manualLicenseFile .ulf`, 'activate.log');
+    console.log(fs.readFileSync("activate.log", "utf-8"));
 
-    const log = fs.readFileSync(".log", "utf-8");
+    const log = fs.readFileSync("activate.log", "utf-8");
     if (!/ Next license update check is after /.test(log)) {
       return false;
     }
@@ -69,14 +71,17 @@ export class Unity {
 
   async createAlf(): Promise<string> {
     console.log("マニュアルアクティベート作成");
-    await this.u3dRun(`-createManualActivationFile -logFile .log`);
-    console.log(fs.readFileSync(".log", "utf-8"));
+    await this.u3dRun(`-createManualActivationFile`, 'createAlf.log');
+    console.log(fs.readFileSync("createAlf.log", "utf-8"));
+
     console.log("マニュアルアクティベート作成完了");
     return fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8");
   }
 
   async run(projectPath: string, args: string): Promise<number> {
     console.log("プロジェクト実行");
-    return this.u3dRun(`-projectPath ${projectPath} ${args}`);
+    const exitCode = await this.u3dRun(`-projectPath ${projectPath} ${args}`, 'run.log');
+    console.log(fs.readFileSync("run.log", "utf-8"));
+    return exitCode;
   }
 }

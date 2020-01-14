@@ -36,10 +36,11 @@ class Unity {
             });
         });
     }
-    u3dRun(args, quit = true) {
+    u3dRun(args, log, quit = true) {
         return __awaiter(this, void 0, void 0, function* () {
             const q = quit ? "-quit" : "";
-            return this.u3d(`-u ${this.version} -- ${q} -batchmode -nographics -logFile .log ${args}`);
+            const exitCode = yield this.u3d(`-u ${this.version} -- ${q} -batchmode -nographics -logFile ${log} ${args}`);
+            return exitCode;
         });
     }
     gem(args) {
@@ -68,9 +69,9 @@ class Unity {
                 return false;
             }
             fs.writeFileSync(".ulf", ulf || "", "utf-8");
-            yield this.u3dRun(`-manualLicenseFile .ulf -logFile .log`);
-            console.log(fs.readFileSync(".log", "utf-8"));
-            const log = fs.readFileSync(".log", "utf-8");
+            yield this.u3dRun(`-manualLicenseFile .ulf`, 'activate.log');
+            console.log(fs.readFileSync("activate.log", "utf-8"));
+            const log = fs.readFileSync("activate.log", "utf-8");
             if (!/ Next license update check is after /.test(log)) {
                 return false;
             }
@@ -81,8 +82,8 @@ class Unity {
     createAlf() {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("マニュアルアクティベート作成");
-            yield this.u3dRun(`-createManualActivationFile -logFile .log`);
-            console.log(fs.readFileSync(".log", "utf-8"));
+            yield this.u3dRun(`-createManualActivationFile`, 'createAlf.log');
+            console.log(fs.readFileSync("createAlf.log", "utf-8"));
             console.log("マニュアルアクティベート作成完了");
             return fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8");
         });
@@ -90,7 +91,9 @@ class Unity {
     run(projectPath, args) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("プロジェクト実行");
-            return this.u3dRun(`-projectPath ${projectPath} ${args}`);
+            const exitCode = yield this.u3dRun(`-projectPath ${projectPath} ${args}`, 'run.log');
+            console.log(fs.readFileSync("run.log", "utf-8"));
+            return exitCode;
         });
     }
 }

@@ -56,10 +56,14 @@ exports.findRubyVersion = findRubyVersion;
 function install() {
     return __awaiter(this, void 0, void 0, function* () {
         const toolPath = findRubyVersion("2.6.x");
-        process.env['PATH'] += `;${toolPath}`;
-        console.log(fs.existsSync(path.join(toolPath, 'gem')));
-        console.log(process.env['PATH']);
-        yield exec_1.exec(`gem install u3d`);
+        process.env["PATH"] += `;${toolPath}`;
+        console.log(fs.existsSync(path.join(toolPath, "gem")));
+        console.log(process.env["PATH"]);
+        yield exec_1.exec(`echo %PATH%`);
+        if (process.platform == "win32")
+            yield exec_1.exec(`gem.cmd install u3d`);
+        else
+            yield exec_1.exec(`gem install u3d`);
         yield exec_1.exec("u3d available");
     });
 }

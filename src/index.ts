@@ -27,7 +27,7 @@ async function Run() {
   await unityInstaller.ExecuteSetUp(version, option);
 }
 
-export function findRubyVersion(version: string) :string {
+export function findRubyVersion(version: string): string {
   const installDir: string | null = tc.find("Ruby", version);
 
   if (!installDir) {
@@ -42,11 +42,15 @@ export function findRubyVersion(version: string) :string {
 
 export async function install() {
   const toolPath = findRubyVersion("2.6.x");
-  process.env['PATH'] += `;${toolPath}`;
+  process.env["PATH"] += `;${toolPath}`;
 
-  console.log( fs.existsSync(path.join(toolPath, 'gem')));
-  console.log( process.env['PATH']);
-  await exec(`gem install u3d`);
+  console.log(fs.existsSync(path.join(toolPath, "gem")));
+  console.log(process.env["PATH"]);
+  await exec(`echo %PATH%`);
+  
+  if (process.platform == "win32") await exec(`gem.cmd install u3d`);
+  else await exec(`gem install u3d`);
+
   await exec("u3d available");
 }
 

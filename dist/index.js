@@ -54,26 +54,30 @@ function findRubyVersion(version) {
 }
 exports.findRubyVersion = findRubyVersion;
 class Unity {
-    constructor(version, packages) {
+    constructor(version, packages, cwd = undefined, args = undefined) {
         this.gem = "gem";
         this.u3d = "u3d";
         this.installPath = "u3d";
         this.version = version;
+        var m = version.match(/([\d\.]+)(.*)/);
+        this.semver = m ? `${m[1]}-${m[2]}` : "";
         this.packages = packages;
+        this.cwd = cwd || process.cwd();
+        this.args = args || "";
         if (process.platform == "win32") {
             this.gem += ".cmd";
             this.u3d += ".bat";
         }
         this.installPath = `C:\\Program Files\\Unity_${version}`;
     }
-    install() {
+    run() {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("rubyをインストールします");
             core.addPath(path.join(tc.find("Ruby", "2.6.x"), "bin"));
             console.log("u3dをインストールします");
             yield exec_1.exec(`${this.gem} install u3d`);
-            console.log(`Unityのインストールをチェック Unity ${this.version}`);
-            const installDir = tc.find("Unity", this.version);
+            console.log(`Unityのインストールをチェック Unity ${this.semver}`);
+            const installDir = tc.find("Unity", this.semver);
             let installedFiles = 0;
             if (installDir) {
                 console.log("Unityはインストール済みです");
@@ -97,9 +101,13 @@ class Unity {
             if (installedFiles != fs.readdirSync(this.installPath).length) {
                 console.log("インストールによって、ファイル数が変化しました");
                 console.log(`Unityをキャッシュします Unity ${this.version}`);
-                yield tc.cacheDir(`${this.installPath}`, "Unity", this.version);
-                console.log(`Unityは次のディレクトリにキャッシュされました ${tc.find("Unity", this.version)}`);
+                yield tc.cacheDir(`${this.installPath}`, "Unity", this.semver);
+                console.log(`Unityは次のディレクトリにキャッシュされました ${tc.find("Unity", this.semver)}`);
             }
+            console.log("Unityの実行");
+            console.log(`args: ${this.args},`);
+            console.log(`cwd: ${this.cwd},`);
+            yield exec_1.exec(`${this.u3d} -- -batchmode ${this.args}`, [], { cwd: this.cwd });
         });
     }
 }
@@ -131,7 +139,7 @@ class Unity {
 function install() {
     return __awaiter(this, void 0, void 0, function* () {
         const u = new Unity("2018.3.10f1", "WebGL");
-        yield u.install();
+        yield u.run();
         return;
         // findRubyVersion("2.6.x");
         // // process.env["PATH"] += `;${toolPath}`;

@@ -24,7 +24,7 @@ export class Unity {
   async u3dRun(args: string, log: string, quit: boolean = true): Promise<number> {
     const q = quit ? "-quit" : "";
     const exitCode = await this.u3d(
-      `-u ${this.version} -- ${q} -batchmode -nographics -logFile ${log} ${args}`
+      `-u ${this.version} -- ${q} -batchmode -logFile ${log} ${args}`
     );
 
     return exitCode;
@@ -65,8 +65,9 @@ export class Unity {
       return false;
     }
 
-    console.log("マニュアルアクティベート成功");
-    return true;
+    console.log("マニュアルアクティベートテスト");
+    const exitCode = await this.u3dRun(``, 'activate-check.log');
+    return exitCode == 0;
   }
 
   async createAlf(): Promise<string> {

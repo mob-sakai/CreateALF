@@ -39,7 +39,7 @@ class Unity {
     u3dRun(args, log, quit = true) {
         return __awaiter(this, void 0, void 0, function* () {
             const q = quit ? "-quit" : "";
-            const exitCode = yield this.u3d(`-u ${this.version} -- ${q} -batchmode -nographics -logFile ${log} ${args}`);
+            const exitCode = yield this.u3d(`-u ${this.version} -- ${q} -batchmode -logFile ${log} ${args}`);
             return exitCode;
         });
     }
@@ -75,8 +75,9 @@ class Unity {
             if (!/ Next license update check is after /.test(log)) {
                 return false;
             }
-            console.log("マニュアルアクティベート成功");
-            return true;
+            console.log("マニュアルアクティベートテスト");
+            const exitCode = yield this.u3dRun(``, 'activate-check.log');
+            return exitCode == 0;
         });
     }
     createAlf() {

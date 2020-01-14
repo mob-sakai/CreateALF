@@ -25,6 +25,7 @@ const fs = __importStar(require("fs"));
 const exec_1 = require("@actions/exec");
 const github = __importStar(require("@actions/github"));
 function Run() {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const version = core_1.getInput("unity-version", { required: true });
         const unityInstaller = installer_1.CreateInstaller();
@@ -46,41 +47,73 @@ function Run() {
         // const modules = getInput("unity-modules", { required: false }) || '';
         // const project_path = getInput("project-path", { required: false }) || '.';
         // const args = getInput("args", { required: false }) || '';
+        console.log(process.platform);
         console.log("Unityがキャッシュにある？");
         console.log(tc.findAllVersions("Unity"));
         const version_ = "2018.3.11f1";
         const modules = "";
         const project_path = ".";
         const args = "";
-        const u = new Unity(version_, modules);
         const secrets = JSON.parse(core_1.getInput("secrets", { required: true }));
-        yield u.createAlfIssue("thisisalf", secrets["GITHUB_TOKEN"]);
-        return;
-        yield u.install();
-        if (yield u.activate(secrets[u.ulfKey])) {
-            yield u.run(project_path, args);
-            yield u.deactivate();
+        const unity = new Unity(version_, modules);
+        yield unity.install();
+        const ulfSecret = secrets[getUlfSecret(version_)];
+        const ulf = secrets[ulfSecret];
+        if (yield unity.activate(ulf)) {
+            yield unity.run(project_path, args);
+            yield unity.deactivate();
         }
         else {
-            const alf = yield u.createAlf();
-            yield u.createAlfIssue(alf, secrets["GITHUB_TOKEN"]);
+            // const ulfSecret = unity.getUlfSecret();
+            core.setFailed(`Secret '${ulfSecret}' is undefined.`);
+            const alf = yield unity.createAlf();
+            const token = secrets["GITHUB_TOKEN"];
+            const alfName = `Unity_v${unity.version}.alf`;
+            const ulfName = `Unity_v${unity.version.split(".")[0]}.x.ulf`;
+            const title = `[Actions] Secret '${ulfSecret}' has been requested by workflow '${github.context.workflow}'`;
+            const body = `### Follow the instructions below to set up secret \`${ulfSecret}\`.
+
+1. Save the following text as \`${alfName}\`.  
+\`\`\`
+${alf}
+\`\`\`
+2. Activate \`${alfName}\` on the following page and download \`${ulfName}\`.  
+https://license.unity3d.com/manual
+3. Add/update the contents of \`${ulfName}\` as secret \`${ulfSecret}\`.  
+${(_a = github.context.payload.repository) === null || _a === void 0 ? void 0 : _a.html_url}/settings/secrets
+`;
+            yield new github.GitHub(token || "").issues.create(Object.assign(Object.assign({}, github.context.repo), { title,
+                body }));
         }
     });
+}
+function getUlfSecret(version) {
+    const major = version.split(".")[0];
+    switch (process.platform) {
+        case "darwin":
+            return "UNITY_OSX_" + major;
+        case "win32":
+            return "UNITY_WIN_" + major;
+        default:
+            return "UNITY_LINUX_" + major;
+    }
 }
 class Unity {
     constructor(version, packages) {
         this.version = version;
         this.packages = packages;
-        const major = version.split(".")[0];
-        switch (process.platform) {
-            case "darwin":
-                this.ulfKey = "UNITY_OSX_" + major;
-            case "win32":
-                this.ulfKey = "UNITY_WIN_" + major;
-            default:
-                this.ulfKey = "UNITY_LINUX_" + major;
-        }
     }
+    // getUlfSecret(): string {
+    //   const major = this.version.split(".")[0];
+    //   switch (process.platform) {
+    //     case "darwin":
+    //       return "UNITY_OSX_" + major;
+    //     case "win32":
+    //       return "UNITY_WIN_" + major;
+    //     default:
+    //       return "UNITY_LINUX_" + major;
+    //   }
+    // }
     u3d(args) {
         return __awaiter(this, void 0, void 0, function* () {
             const exe = process.platform == "win32" ? "u3d.bat" : "u3d";
@@ -94,7 +127,7 @@ class Unity {
     u3dRun(args, quit = true) {
         return __awaiter(this, void 0, void 0, function* () {
             const q = quit ? "-quit" : "";
-            return this.u3d(`-t -u ${this.version} -- ${q} -batchmode -nographics ${args}`);
+            return this.u3d(`-u ${this.version} -- ${q} -batchmode -nographics ${args}`);
         });
     }
     gem(args) {
@@ -121,7 +154,6 @@ class Unity {
         return __awaiter(this, void 0, void 0, function* () {
             if (!ulf) {
                 console.log("ulfがない");
-                core.setFailed(`Secret '${this.ulfKey}' is undefined.`);
                 return false;
             }
             console.log("マニュアルアクティベート実行");
@@ -131,45 +163,47 @@ class Unity {
             const log = fs.readFileSync(".log", "utf-8");
             if (!/ Next license update check is after /.test(log)) {
                 console.log("アクティベートに失敗");
-                core.setFailed(`Secret is not available.`);
                 return false;
             }
-            console.log("マニュアルアクティベート終了");
+            console.log("マニュアルアクティベート成功");
             return true;
         });
     }
     createAlf() {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log("マニュアルアクティベート作成");
             yield this.u3dRun(`-createManualActivationFile -logFile .log`);
             console.log(fs.readFileSync(".log", "utf-8"));
-            // console.log("---- alfを適切に処理してください ----");
-            // console.log("---- ここから ----");
-            // console.log(fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8"));
-            // console.log("---- ここまで ----");
+            console.log("マニュアルアクティベート作成完了");
             return fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8");
         });
     }
-    createAlfIssue(alf, token) {
-        var _a;
-        return __awaiter(this, void 0, void 0, function* () {
-            const alfName = `Unity_v${this.version}.alf`;
-            const ulfName = `Unity_v${this.version.split(".")[0]}.x.ulf`;
-            const title = `[Actions] Secret '${this.ulfKey}' has been requested by workflow '${github.context.workflow}'`;
-            const body = `### Follow the instructions below to set up secret '${this.ulfKey}'.
-
-1. Save the following text as \`${alfName}\`.  
-\`\`\`
-${alf}
-\`\`\`
-2. Activate \`${alfName}\` on the following page and download \`${ulfName}\`.  
-https://license.unity3d.com/manual
-3. Add/update the contents of \`${ulfName}\` as secret '${this.ulfKey}'.  
-${(_a = github.context.payload.repository) === null || _a === void 0 ? void 0 : _a.html_url}/settings/secrets
-`;
-            yield new github.GitHub(token || "").issues.create(Object.assign(Object.assign({}, github.context.repo), { title,
-                body }));
-        });
-    }
+    //   async createAlfIssue(
+    //     alf: string,
+    //     token: string | undefined,
+    //     context: Context
+    //   ): Promise<void> {
+    //     const alfName = `Unity_v${this.version}.alf`;
+    //     const ulfName = `Unity_v${this.version.split(".")[0]}.x.ulf`;
+    //     const title = `[Actions] Secret '${this.getUlfSecret()}' has been requested by workflow '${
+    //       context.workflow
+    //     }'`;
+    //     const body = `### Follow the instructions below to set up secret '${this.getUlfSecret()}'.
+    // 1. Save the following text as \`${alfName}\`.
+    // \`\`\`
+    // ${alf}
+    // \`\`\`
+    // 2. Activate \`${alfName}\` on the following page and download \`${ulfName}\`.
+    // https://license.unity3d.com/manual
+    // 3. Add/update the contents of \`${ulfName}\` as secret '${this.getUlfSecret()}'.
+    // ${github.context.payload.repository?.html_url}/settings/secrets
+    // `;
+    //     await new github.GitHub(token || "").issues.create({
+    //       ...context.repo,
+    //       title,
+    //       body
+    //     });
+    //   }
     deactivate() {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("マニュアルアクティベート返却");
@@ -184,6 +218,9 @@ ${(_a = github.context.payload.repository) === null || _a === void 0 ? void 0 : 
             const code = yield this.u3dRun(`-projectPath ${projectPath} ${args}`);
             console.log("プロジェクト終了");
             console.log(`exit code = ${code}`);
+            if (code != 0) {
+                core.setFailed("Unity failed with exit code 1");
+            }
         });
     }
 }

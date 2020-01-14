@@ -47,12 +47,22 @@ export async function install() {
   // console.log(fs.existsSync(path.join(toolPath, "gem")));
   // console.log(process.env["PATH"]);
 
+  const version = "2018.3.14f1";
+
   if (process.platform == "win32") {
-    await exec('gem.cmd install u3d');
-    await exec('u3d.bat available');
+    await exec(`gem.cmd install u3d`);
+    await exec(`u3d.bat available`);
+    await exec(`u3d.bat install ${version}`);
+    await exec(`u3d.bat install ${version} -p WebGL`);
+    tc.cacheDir(`C:\\Program Files\\Unity_${version}`, 'Unity', version);
   } else {
-    await exec('gem install u3d');
-    await exec('u3d available');
+    await exec(`gem install u3d`);
+    await exec(`u3d available`);
+    await exec(`u3d install ${version}`);
+    await exec(`u3d install ${version} -p WebGL`);
+    if (process.platform == "darwin")
+      tc.cacheDir(`/Application/Unity_${version}`, 'Unity', version);
+    else tc.cacheDir(`/opt/unity-ediotr-${version}`, 'Unity', version);
   }
 }
 

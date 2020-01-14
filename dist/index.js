@@ -58,13 +58,23 @@ function install() {
         // process.env["PATH"] += `;${toolPath}`;
         // console.log(fs.existsSync(path.join(toolPath, "gem")));
         // console.log(process.env["PATH"]);
+        const version = "2018.3.14f1";
         if (process.platform == "win32") {
-            yield exec_1.exec('gem.cmd install u3d');
-            yield exec_1.exec('u3d.bat available');
+            yield exec_1.exec(`gem.cmd install u3d`);
+            yield exec_1.exec(`u3d.bat available`);
+            yield exec_1.exec(`u3d.bat install ${version}`);
+            yield exec_1.exec(`u3d.bat install ${version} -p WebGL`);
+            tc.cacheDir(`C:\\Program Files\\Unity_${version}`, 'Unity', version);
         }
         else {
-            yield exec_1.exec('gem install u3d');
-            yield exec_1.exec('u3d available');
+            yield exec_1.exec(`gem install u3d`);
+            yield exec_1.exec(`u3d available`);
+            yield exec_1.exec(`u3d install ${version}`);
+            yield exec_1.exec(`u3d install ${version} -p WebGL`);
+            if (process.platform == "darwin")
+                tc.cacheDir(`/Application/Unity_${version}`, 'Unity', version);
+            else
+                tc.cacheDir(`/opt/unity-ediotr-${version}`, 'Unity', version);
         }
     });
 }

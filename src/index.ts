@@ -27,169 +27,94 @@ async function Run() {
     args: getInput("args", { required: true })
   };
   await unityInstaller.ExecuteSetUp(version, option);
-}
 
-export function findRubyVersion(version: string) {
-  const installDir: string | null = tc.find("Ruby", version);
-
-  if (!installDir) {
-    throw new Error(`Version ${version} not found`);
-  }
-
-  const toolPath: string = path.join(installDir, "bin");
-
-  core.addPath(toolPath);
+  const u = new Unity("2018.3.10f1", "WebGL");
+  await u.install();
+  await u.run(option.ulf, path.resolve("."), "-quit");
 }
 
 class Unity {
   version: string;
   packages: string;
-  cwd: string;
-  args: string;
-  gem: string = "gem";
-  u3d: string = "u3d";
-  installPath: string = "u3d";
-  semver: string;
-  constructor(
-    version: string,
-    packages: string,
-    cwd: string | undefined = undefined,
-    args: string | undefined = undefined
-  ) {
+  constructor(version: string, packages: string) {
     this.version = version;
-    var m = version.match(/([\d\.]+)(.*)/);
-    this.semver = m ? `${m[1]}-${m[2]}` : "";
     this.packages = packages;
-    this.cwd = cwd || process.cwd();
-    this.args = args || "";
-    if (process.platform == "win32") {
-      this.gem += ".cmd";
-      this.u3d += ".bat";
-    }
-    this.installPath = `C:\\Program Files\\Unity_${version}`;
   }
 
-  async run(): Promise<void> {
+  async u3d(args: string) {
+    const exe = process.platform == "win32" ? "u3d.bat" : "u3d";
+    await exec(`${exe} ${args}`, [], {
+      failOnStdErr: false,
+      ignoreReturnCode: true,
+      windowsVerbatimArguments: true
+    });
+  }
+
+  async gem(args: string) {
+    const exe = process.platform == "win32" ? "gem.cmd" : "gem";
+    await exec(`${exe} ${args}`);
+  }
+
+  async install(): Promise<void> {
     console.log("rubyをインストールします");
     core.addPath(path.join(tc.find("Ruby", "2.6.x"), "bin"));
 
     console.log("u3dをインストールします");
-    await exec(`${this.gem} install u3d`);
+    await this.gem(`install u3d`);
 
-    console.log(`Unityのインストールをチェック Unity ${this.semver}`);
-    const installDir: string | null = tc.find("Unity", this.semver);
-
-    let installedFiles = 0;
-    if (installDir) {
-      console.log("Unityはインストール済みです");
-      console.log(installDir);
-      console.log("コピーします");
-      await io.cp(installDir, this.installPath, {
-        force: true,
-        recursive: true
-      });
-      installedFiles = fs.readdirSync(this.installPath).length;
-    } else {
-      console.log("Unityは未インストールです");
-      console.log("インストールします");
-      await exec(`${this.u3d} install ${this.version}`);
-    }
+    console.log("Unityをインストールします");
+    await this.u3d(`install ${this.version}`);
 
     if (this.packages) {
-      console.log(
-        "Unityのパッケージをインストールします。インストール済みのものはスキップされます。"
-      );
-      await exec(`${this.u3d} install ${this.version} -p ${this.packages}`);
+      await this.u3d(`install ${this.version} -p ${this.packages}`);
+    }
+  }
+
+  async createAlf(): Promise<void> {
+    await this.u3d(
+      `-t -u ${this.version} -- -quit -batchmode -nographics -createManualActivationFile`
+    );
+
+    console.log("---- alfを適切に処理してください ----");
+    console.log("---- ここから ----");
+    console.log(fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8"));
+    console.log("---- ここまで ----");
+  }
+
+  async run(
+    ulf: string | undefined,
+    projectPath: string,
+    args: string
+  ): Promise<void> {
+    if (!ulf) {
+      core.setFailed(`Secret is undefined.`);
+      await this.createAlf();
+      return;
     }
 
-    if (installedFiles != fs.readdirSync(this.installPath).length) {
-      console.log("インストールによって、ファイル数が変化しました");
-      console.log(`Unityをキャッシュします Unity ${this.version}`);
-      await tc.cacheDir(`${this.installPath}`, "Unity", this.semver);
-      console.log(
-        `Unityは次のディレクトリにキャッシュされました ${tc.find(
-          "Unity",
-          this.semver
-        )}`
-      );
+    fs.writeFileSync(".ulf", ulf || "", "utf-8");
+    await this.u3d(
+      `-t -u ${this.version} -- -quit -batchmode -nographics -manualLicenseFile .ulf -logFile .log`
+    );
+    const activated = / Next license update check is after /.test(
+      fs.readFileSync(".log", "utf-8")
+    );
+    if (!activated) {
+      console.log("アクティベートに失敗");
+      core.setFailed(`Secret is not available.`);
+      await this.createAlf();
     }
 
-    console.log("Unityの実行");
-    console.log(`args: ${this.args},`);
-    console.log(`cwd: ${this.cwd},`);
-
-    await exec(
-      `${this.u3d} run -u ${this.version} -- -batchmode ${this.args}`,
-      [],
-      { cwd: this.cwd }
+    await this.u3d(
+      `-t -u ${this.version} -- -projectPath ${projectPath} -batchmode -nographics ${args}`
     );
   }
 }
 
-// export async function gem(args: string) {
-//   const exe: string = process.platform == "win32" ? "gem.cmd" : "gem";
-//   await exec(`${exe} ${args}`);
+// export async function install() {
+//   const u = new Unity("2018.3.10f1", "WebGL");
+//   await u.install();
+//   await u.run(path.resolve("."), "-quit");
 // }
 
-// export async function u3d(args: string) {
-//   const exe: string = process.platform == "win32" ? "u3d.bat" : "u3d";
-//   await exec(`${exe} ${args}`);
-// }
-
-// export async function installUnity(
-//   version: string,
-//   packages: string | undefined
-// ) {
-//   await gem(`install u3d`);
-//   await gem(`which u3d`);
-//   await u3d(`available`);
-//   await u3d(`install ${version}`);
-//   await u3d(`list`);
-//   if (packages) await u3d(`install ${version} -p ${packages}`);
-//   // await exec(`${gem} install u3d`);
-//   // await exec(`${gem} which u3d`);
-//   // await exec(`${u3d} available`);
-//   // await exec(`${u3d} install ${version}`);
-//   // if (packages) await exec(`${u3d} install ${version} -p ${packages}`);
-//   // await exec(`${u3d} list`);
-// }
-
-export async function install() {
-  const u = new Unity("2018.3.10f1", "WebGL", undefined, "-quit");
-  await u.run();
-  return;
-
-  // findRubyVersion("2.6.x");
-  // // process.env["PATH"] += `;${toolPath}`;
-
-  // // console.log(fs.existsSync(path.join(toolPath, "gem")));
-  // // console.log(process.env["PATH"]);
-
-  // if (process.platform == "win32") {
-  //   await installUnity(version, "WebGL");
-  //   // await exec(`gem.cmd install u3d`);
-  //   // await exec(`u3d.bat available`);
-  //   // await exec(`u3d.bat install ${version}`);
-  //   // await exec(`u3d.bat install ${version} -p WebGL`);
-  //   // await exec(`u3d.bat list`);
-  //   await tc.cacheDir(
-  //     `C:\\Program Files\\Unity_${version}`,
-  //     "Unity",
-  //     "2018.3.13-f1"
-  //   );
-  //   console.log(tc.find("Unity", "2018.3.13-f1"));
-  //   console.log("finish !!!");
-  // } else {
-  //   await exec(`gem install u3d`);
-  //   await exec(`u3d available`);
-  //   await exec(`u3d install ${version}`);
-  //   await exec(`u3d install ${version} -p WebGL`);
-  //   await exec(`u3d list`);
-  //   if (process.platform == "darwin")
-  //     tc.cacheDir(`/Application/Unity_${version}`, "Unity", version);
-  //   else tc.cacheDir(`/opt/unity-ediotr-${version}`, "Unity", version);
-  //   console.log(tc.find("Unity", version));
-  // }
-}
-
-install();
+Run();

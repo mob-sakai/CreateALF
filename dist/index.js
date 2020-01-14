@@ -8,14 +8,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const installer_1 = require("./Installers/installer");
 const core_1 = require("@actions/core");
+const tc = __importStar(require("@actions/tool-cache"));
 function Run() {
     return __awaiter(this, void 0, void 0, function* () {
         const version = core_1.getInput("unity-version", { required: true });
         const unityInstaller = installer_1.CreateInstaller();
-        const ulfKey = `ULF_${unityInstaller.GetPlatform()}_${version.split('.')[0]}`;
+        const ulfKey = `ULF_${unityInstaller.GetPlatform()}_${version.split(".")[0]}`;
         core_1.setOutput("id", unityInstaller.GetId(version));
         const option = {
             "has-android": core_1.getInput("has-android", { required: false }),
@@ -24,11 +32,40 @@ function Run() {
             "has-mac-mono": core_1.getInput("has-mac-mono", { required: false }),
             "has-webgl": core_1.getInput("has-webgl", { required: false }),
             "has-windows-mono": core_1.getInput("has-windows-mono", { required: false }),
-            "ulfKey": ulfKey,
-            "ulf": JSON.parse(core_1.getInput("secrets", { required: true }))[ulfKey],
-            "args": core_1.getInput("args", { required: true }),
+            ulfKey: ulfKey,
+            ulf: JSON.parse(core_1.getInput("secrets", { required: true }))[ulfKey],
+            args: core_1.getInput("args", { required: true })
         };
         yield unityInstaller.ExecuteSetUp(version, option);
     });
 }
-Run();
+function findRubyVersion() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const versions = tc.findAllVersions("Ruby");
+        console.log("Ruby");
+        console.log(versions);
+        // const installDir: string | null = tc.find("Ruby", version);
+        // if (!installDir) {
+        //   throw new Error(`Version ${version} not found`);
+        // }
+        // const toolPath: string = path.join(installDir, "bin");
+        // core.addPath(toolPath);
+    });
+}
+exports.findRubyVersion = findRubyVersion;
+function findU3d() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const versions = tc.findAllVersions("u3d");
+        console.log("u3d");
+        console.log(versions);
+        // if (!installDir) {
+        //   throw new Error(`Version ${version} not found`);
+        // }
+        // const toolPath: string = path.join(installDir, "bin");
+        // core.addPath(toolPath);
+    });
+}
+exports.findU3d = findU3d;
+// Run();
+findRubyVersion();
+findU3d();

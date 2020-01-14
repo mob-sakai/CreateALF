@@ -40,16 +40,37 @@ function Run() {
             ulf: JSON.parse(core_1.getInput("secrets", { required: true }))[ulfKey],
             args: core_1.getInput("args", { required: true })
         };
-        yield unityInstaller.ExecuteSetUp(version, option);
-        const u = new Unity("2018.3.10f1", "WebGL");
+        // await unityInstaller.ExecuteSetUp(version, option);
+        // const version_ = getInput("unity-version", { required: true }) || '2018.3.11f1';
+        // const modules = getInput("unity-modules", { required: false }) || '';
+        // const project_path = getInput("project-path", { required: false }) || '.';
+        // const args = getInput("args", { required: false }) || '';
+        const version_ = "2018.3.11f1";
+        const modules = "";
+        const project_path = ".";
+        const args = "";
+        const u = new Unity(version_, modules);
+        const ulf = JSON.parse(core_1.getInput("secrets", { required: true }))[u.ulfKey];
         yield u.install();
-        yield u.run(option.ulf, path.resolve("."), "-quit");
+        if (yield u.activate(ulf)) {
+            yield u.run(project_path, args);
+            yield u.deactivate();
+        }
     });
 }
 class Unity {
     constructor(version, packages) {
         this.version = version;
         this.packages = packages;
+        const major = version.split(".")[0];
+        switch (process.platform) {
+            case "darwin":
+                this.ulfKey = "UNITY_OSX_" + major;
+            case "win32":
+                this.ulfKey = "UNITY_WIN_" + major;
+            default:
+                this.ulfKey = "UNITY_LINUX_" + major;
+        }
     }
     u3d(args) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -61,7 +82,6 @@ class Unity {
             });
         });
     }
-    // `-t -u ${this.version} -- -quit -batchmode -nographics -manualLicenseFile .ulf -logFile .log`
     u3dRun(args, quit = true) {
         return __awaiter(this, void 0, void 0, function* () {
             const exe = process.platform == "win32" ? "u3d.bat" : "u3d";
@@ -89,22 +109,13 @@ class Unity {
             }
         });
     }
-    createAlf() {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.u3dRun(`-createManualActivationFile -logFile .log`);
-            console.log(fs.readFileSync(".log", "utf-8"));
-            console.log("---- alfを適切に処理してください ----");
-            console.log("---- ここから ----");
-            console.log(fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8"));
-            console.log("---- ここまで ----");
-        });
-    }
-    run(ulf, projectPath, args) {
+    activate(ulf) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!ulf) {
-                core.setFailed(`Secret is undefined.`);
+                console.log("ulfがない");
+                core.setFailed(`Secret '${this.ulfKey}' is undefined.`);
                 yield this.createAlf();
-                return;
+                return false;
             }
             console.log("マニュアルアクティベート実行");
             fs.writeFileSync(".ulf", ulf || "", "utf-8");
@@ -115,14 +126,36 @@ class Unity {
                 console.log("アクティベートに失敗");
                 core.setFailed(`Secret is not available.`);
                 yield this.createAlf();
+                return false;
             }
+            console.log("マニュアルアクティベート終了");
+            return true;
+        });
+    }
+    createAlf() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.u3dRun(`-createManualActivationFile -logFile .log`);
+            console.log(fs.readFileSync(".log", "utf-8"));
+            console.log("---- alfを適切に処理してください ----");
+            console.log("---- ここから ----");
+            console.log(fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8"));
+            console.log("---- ここまで ----");
+        });
+    }
+    deactivate() {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("マニュアルアクティベート返却");
+            yield this.u3dRun(`-returnlicense -logFile .log`);
+            console.log(fs.readFileSync(".log", "utf-8"));
+            console.log("マニュアルアクティベート返却終了");
+        });
+    }
+    run(projectPath, args) {
+        return __awaiter(this, void 0, void 0, function* () {
             console.log("プロジェクト実行");
             const code = yield this.u3dRun(`-projectPath ${projectPath} ${args}`);
             console.log("プロジェクト終了");
             console.log(`exit code = ${code}`);
-            console.log("マニュアルアクティベート返却");
-            yield this.u3dRun(`-returnlicense -logFile .log`);
-            console.log(fs.readFileSync(".log", "utf-8"));
         });
     }
 }

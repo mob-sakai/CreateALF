@@ -26,19 +26,44 @@ async function Run() {
     ulf: JSON.parse(getInput("secrets", { required: true }))[ulfKey],
     args: getInput("args", { required: true })
   };
-  await unityInstaller.ExecuteSetUp(version, option);
+  // await unityInstaller.ExecuteSetUp(version, option);
 
-  const u = new Unity("2018.3.10f1", "WebGL");
+  // const version_ = getInput("unity-version", { required: true }) || '2018.3.11f1';
+  // const modules = getInput("unity-modules", { required: false }) || '';
+  // const project_path = getInput("project-path", { required: false }) || '.';
+  // const args = getInput("args", { required: false }) || '';
+
+  const version_ = "2018.3.11f1";
+  const modules = "";
+  const project_path = ".";
+  const args = "";
+
+  const u = new Unity(version_, modules);
+  const ulf = JSON.parse(getInput("secrets", { required: true }))[u.ulfKey];
   await u.install();
-  await u.run(option.ulf, path.resolve("."), "-quit");
+  if (await u.activate(ulf)) {
+    await u.run(project_path, args);
+    await u.deactivate();
+  }
 }
 
 class Unity {
   version: string;
   packages: string;
+  ulfKey: string;
   constructor(version: string, packages: string) {
     this.version = version;
     this.packages = packages;
+    const major = version.split(".")[0];
+
+    switch (process.platform) {
+      case "darwin":
+        this.ulfKey = "UNITY_OSX_" + major;
+      case "win32":
+        this.ulfKey = "UNITY_WIN_" + major;
+      default:
+        this.ulfKey = "UNITY_LINUX_" + major;
+    }
   }
 
   async u3d(args: string): Promise<number> {
@@ -49,7 +74,7 @@ class Unity {
       windowsVerbatimArguments: true
     });
   }
-  // `-t -u ${this.version} -- -quit -batchmode -nographics -manualLicenseFile .ulf -logFile .log`
+
   async u3dRun(args: string, quit: boolean = true): Promise<number> {
     const exe = process.platform == "win32" ? "u3d.bat" : "u3d";
     const q = quit ? "-quit" : "";
@@ -79,25 +104,12 @@ class Unity {
     }
   }
 
-  async createAlf(): Promise<void> {
-    await this.u3dRun(`-createManualActivationFile -logFile .log`);
-    console.log(fs.readFileSync(".log", "utf-8"));
-
-    console.log("---- alfを適切に処理してください ----");
-    console.log("---- ここから ----");
-    console.log(fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8"));
-    console.log("---- ここまで ----");
-  }
-
-  async run(
-    ulf: string | undefined,
-    projectPath: string,
-    args: string
-  ): Promise<void> {
+  async activate(ulf: string | undefined): Promise<boolean> {
     if (!ulf) {
-      core.setFailed(`Secret is undefined.`);
+      console.log("ulfがない");
+      core.setFailed(`Secret '${this.ulfKey}' is undefined.`);
       await this.createAlf();
-      return;
+      return false;
     }
 
     console.log("マニュアルアクティベート実行");
@@ -110,16 +122,35 @@ class Unity {
       console.log("アクティベートに失敗");
       core.setFailed(`Secret is not available.`);
       await this.createAlf();
+      return false;
     }
 
+    console.log("マニュアルアクティベート終了");
+    return true;
+  }
+
+  async createAlf(): Promise<void> {
+    await this.u3dRun(`-createManualActivationFile -logFile .log`);
+    console.log(fs.readFileSync(".log", "utf-8"));
+
+    console.log("---- alfを適切に処理してください ----");
+    console.log("---- ここから ----");
+    console.log(fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8"));
+    console.log("---- ここまで ----");
+  }
+
+  async deactivate(): Promise<void> {
+    console.log("マニュアルアクティベート返却");
+    await this.u3dRun(`-returnlicense -logFile .log`);
+    console.log(fs.readFileSync(".log", "utf-8"));
+    console.log("マニュアルアクティベート返却終了");
+  }
+
+  async run(projectPath: string, args: string): Promise<void> {
     console.log("プロジェクト実行");
     const code = await this.u3dRun(`-projectPath ${projectPath} ${args}`);
     console.log("プロジェクト終了");
     console.log(`exit code = ${code}`);
-
-    console.log("マニュアルアクティベート返却");
-    await this.u3dRun(`-returnlicense -logFile .log`);
-    console.log(fs.readFileSync(".log", "utf-8"));
   }
 }
 

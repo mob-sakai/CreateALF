@@ -54,18 +54,30 @@ function findRubyVersion(version) {
 exports.findRubyVersion = findRubyVersion;
 function gem(args) {
     return __awaiter(this, void 0, void 0, function* () {
-        const exe = process.platform == 'win32' ? 'gem.cmd' : 'gem';
+        const exe = process.platform == "win32" ? "gem.cmd" : "gem";
         yield exec_1.exec(`${exe} ${args}`);
     });
 }
 exports.gem = gem;
 function u3d(args) {
     return __awaiter(this, void 0, void 0, function* () {
-        const exe = process.platform == 'win32' ? 'u3d.bat' : 'u3d';
+        const exe = process.platform == "win32" ? "u3d.bat" : "u3d";
         yield exec_1.exec(`${exe} ${args}`);
     });
 }
 exports.u3d = u3d;
+function installUnity(version, packages) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield gem(`install u3d`);
+        yield gem(`which u3d`);
+        yield u3d(`available`);
+        yield u3d(`install ${version}`);
+        yield u3d(`list`);
+        if (packages)
+            yield u3d(`install ${version} -p ${packages}`);
+    });
+}
+exports.installUnity = installUnity;
 function install() {
     return __awaiter(this, void 0, void 0, function* () {
         const toolPath = findRubyVersion("2.6.x");
@@ -74,13 +86,15 @@ function install() {
         // console.log(process.env["PATH"]);
         const version = "2018.3.13f1";
         if (process.platform == "win32") {
-            yield exec_1.exec(`gem.cmd install u3d`);
-            yield exec_1.exec(`u3d.bat available`);
-            yield exec_1.exec(`u3d.bat install ${version}`);
-            yield exec_1.exec(`u3d.bat install ${version} -p WebGL`);
-            yield exec_1.exec(`u3d.bat list`);
-            tc.cacheDir(`C:\\Program Files\\Unity_${version}`, "Unity", version);
-            console.log(tc.find("Unity", version));
+            installUnity(version, 'WebGL');
+            // await exec(`gem.cmd install u3d`);
+            // await exec(`u3d.bat available`);
+            // await exec(`u3d.bat install ${version}`);
+            // await exec(`u3d.bat install ${version} -p WebGL`);
+            // await exec(`u3d.bat list`);
+            tc.cacheDir(`C:\\Program Files\\Unity_${version}`, "Unity", "2018.3.13-f1");
+            console.log(tc.find("Unity", "2018.3.13-f1"));
+            console.log('finish !!!');
         }
         else {
             yield exec_1.exec(`gem install u3d`);

@@ -32,8 +32,9 @@ function run() {
         const unity = new unity_1.Unity(version_, modules);
         yield unity.install();
         if (yield unity.activate(ulf)) {
-            yield unity.run(project_path, args);
-            yield unity.deactivate();
+            const exitCode = yield unity.run(project_path, args);
+            if (exitCode != 0)
+                core.setFailed(`Unity failed with exit code ${exitCode}`);
         }
         else {
             const alf = yield unity.createAlf();
@@ -42,13 +43,15 @@ function run() {
             const message = `Secret '${ulfKey}' is not available. For detail, see ${res.data.url}`;
             core.setFailed(message);
         }
-        function createAlfIssue(alf, version, ulfKey, token) {
-            var _a;
-            return __awaiter(this, void 0, void 0, function* () {
-                const alfName = `Unity_v${version}.alf`;
-                const ulfName = `Unity_v${version.split(".")[0]}.x.ulf`;
-                const title = `[Actions] Secret '${ulfKey}' has been requested by workflow '${github.context.workflow}'`;
-                const body = `### Follow the instructions below to set up secret \`${ulfKey}\`.
+    });
+}
+function createAlfIssue(alf, version, ulfKey, token) {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        const alfName = `Unity_v${version}.alf`;
+        const ulfName = `Unity_v${version.split(".")[0]}.x.ulf`;
+        const title = `[Actions] Secret '${ulfKey}' has been requested by workflow '${github.context.workflow}'`;
+        const body = `### Follow the instructions below to set up secret \`${ulfKey}\`.
 
 1. Save the following text as \`${alfName}\`.  
 \`\`\`
@@ -58,9 +61,7 @@ ${alf}
 https://license.unity3d.com/manual
 3. Add/update the contents of \`${ulfName}\` as secret \`${ulfKey}\`.  
 ${(_a = github.context.payload.repository) === null || _a === void 0 ? void 0 : _a.html_url}/settings/secrets`;
-                return utility.createIssue(title, body, token);
-            });
-        }
+        return utility.createIssue(title, body, token);
     });
 }
 run();

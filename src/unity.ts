@@ -17,14 +17,14 @@ export class Unity {
     return exec.exec(`${exe} ${args}`, [], {
       failOnStdErr: false,
       ignoreReturnCode: true,
-      windowsVerbatimArguments: true
+      windowsVerbatimArguments: true,
     });
   }
 
   async u3dRun(args: string, quit: boolean = true): Promise<number> {
     const q = quit ? "-quit" : "";
     return this.u3d(
-      `-u ${this.version} -- ${q} -batchmode -nographics ${args}`
+      `-u ${this.version} -- ${q} -batchmode -nographics -logFile .log ${args}`
     );
   }
 
@@ -51,18 +51,15 @@ export class Unity {
 
   async activate(ulf: string): Promise<boolean> {
     if (!ulf) {
-      console.log("ulfがない");
       return false;
     }
 
-    console.log("マニュアルアクティベート実行");
     fs.writeFileSync(".ulf", ulf || "", "utf-8");
     await this.u3dRun(`-manualLicenseFile .ulf -logFile .log`);
     console.log(fs.readFileSync(".log", "utf-8"));
 
     const log = fs.readFileSync(".log", "utf-8");
     if (!/ Next license update check is after /.test(log)) {
-      console.log("アクティベートに失敗");
       return false;
     }
 
@@ -78,21 +75,14 @@ export class Unity {
     return fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8");
   }
 
-  async deactivate(): Promise<void> {
-    console.log("マニュアルアクティベート返却");
-    await this.u3dRun(`-returnlicense -logFile .log`);
-    console.log(fs.readFileSync(".log", "utf-8"));
-    console.log("マニュアルアクティベート返却終了");
-  }
-
-  async run(projectPath: string, args: string): Promise<void> {
+  async run(projectPath: string, args: string): Promise<number> {
     console.log("プロジェクト実行");
-    const code = await this.u3dRun(`-projectPath ${projectPath} ${args}`);
-    console.log("プロジェクト終了");
-    console.log(`exit code = ${code}`);
+    return this.u3dRun(`-projectPath ${projectPath} ${args}`);
+    // console.log("プロジェクト終了");
+    // console.log(`exit code = ${code}`);
 
-    if (code != 0) {
-      core.setFailed("Unity failed with exit code 1");
-    }
+    // if (code != 0) {
+    //   core.setFailed("Unity failed with exit code 1");
+    // }
   }
 }

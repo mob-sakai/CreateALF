@@ -32,14 +32,14 @@ class Unity {
             return exec.exec(`${exe} ${args}`, [], {
                 failOnStdErr: false,
                 ignoreReturnCode: true,
-                windowsVerbatimArguments: true
+                windowsVerbatimArguments: true,
             });
         });
     }
     u3dRun(args, quit = true) {
         return __awaiter(this, void 0, void 0, function* () {
             const q = quit ? "-quit" : "";
-            return this.u3d(`-u ${this.version} -- ${q} -batchmode -nographics ${args}`);
+            return this.u3d(`-u ${this.version} -- ${q} -batchmode -nographics -logFile .log ${args}`);
         });
     }
     gem(args) {
@@ -65,16 +65,13 @@ class Unity {
     activate(ulf) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!ulf) {
-                console.log("ulfがない");
                 return false;
             }
-            console.log("マニュアルアクティベート実行");
             fs.writeFileSync(".ulf", ulf || "", "utf-8");
             yield this.u3dRun(`-manualLicenseFile .ulf -logFile .log`);
             console.log(fs.readFileSync(".log", "utf-8"));
             const log = fs.readFileSync(".log", "utf-8");
             if (!/ Next license update check is after /.test(log)) {
-                console.log("アクティベートに失敗");
                 return false;
             }
             console.log("マニュアルアクティベート成功");
@@ -90,23 +87,15 @@ class Unity {
             return fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8");
         });
     }
-    deactivate() {
-        return __awaiter(this, void 0, void 0, function* () {
-            console.log("マニュアルアクティベート返却");
-            yield this.u3dRun(`-returnlicense -logFile .log`);
-            console.log(fs.readFileSync(".log", "utf-8"));
-            console.log("マニュアルアクティベート返却終了");
-        });
-    }
     run(projectPath, args) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("プロジェクト実行");
-            const code = yield this.u3dRun(`-projectPath ${projectPath} ${args}`);
-            console.log("プロジェクト終了");
-            console.log(`exit code = ${code}`);
-            if (code != 0) {
-                core.setFailed("Unity failed with exit code 1");
-            }
+            return this.u3dRun(`-projectPath ${projectPath} ${args}`);
+            // console.log("プロジェクト終了");
+            // console.log(`exit code = ${code}`);
+            // if (code != 0) {
+            //   core.setFailed("Unity failed with exit code 1");
+            // }
         });
     }
 }

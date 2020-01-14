@@ -86,7 +86,7 @@ export class Unity {
     }
 
     console.log("マニュアルアクティベートテスト");
-    const exitCode = await this.u3dRun(`-quit`, "activate-check.log");
+    const exitCode = await this.u3dRun(`-quit -batchmode`, "activate-check.log");
     return exitCode == 0;
   }
 

@@ -87,7 +87,7 @@ class Unity {
                 return false;
             }
             console.log("マニュアルアクティベートテスト");
-            const exitCode = yield this.u3dRun(`-quit`, "activate-check.log");
+            const exitCode = yield this.u3dRun(`-quit -batchmode`, "activate-check.log");
             return exitCode == 0;
         });
     }

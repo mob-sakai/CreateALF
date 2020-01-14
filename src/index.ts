@@ -34,6 +34,9 @@ async function Run() {
   // const project_path = getInput("project-path", { required: false }) || '.';
   // const args = getInput("args", { required: false }) || '';
 
+  console.log("Unityがキャッシュにある？");
+  console.log(tc.findAllVersions("Unity"));
+  
   const version_ = "2018.3.11f1";
   const modules = "";
   const project_path = ".";
@@ -42,7 +45,7 @@ async function Run() {
   const u = new Unity(version_, modules);
   const secrets = JSON.parse(getInput("secrets", { required: true }));
 
-  await u.createAlfIssue("thisisalf", secrets["GITHUB_TOKEN"] || "");
+  await u.createAlfIssue("thisisalf", secrets["GITHUB_TOKEN"]);
   return;
 
   await u.install();
@@ -51,7 +54,7 @@ async function Run() {
     await u.deactivate();
   } else {
     const alf = await u.createAlf();
-    await u.createAlfIssue(alf, secrets["GITHUB_TOKEN"] || "");
+    await u.createAlfIssue(alf, secrets["GITHUB_TOKEN"]);
   }
 }
 
@@ -84,7 +87,6 @@ class Unity {
   }
 
   async u3dRun(args: string, quit: boolean = true): Promise<number> {
-    const exe = process.platform == "win32" ? "u3d.bat" : "u3d";
     const q = quit ? "-quit" : "";
     return this.u3d(
       `-t -u ${this.version} -- ${q} -batchmode -nographics ${args}`
@@ -97,6 +99,7 @@ class Unity {
   }
 
   async install(): Promise<void> {
+
     console.log("rubyをインストールします");
     core.addPath(path.join(tc.find("Ruby", "2.6.x"), "bin"));
 
@@ -139,38 +142,35 @@ class Unity {
     await this.u3dRun(`-createManualActivationFile -logFile .log`);
     console.log(fs.readFileSync(".log", "utf-8"));
 
-    console.log("---- alfを適切に処理してください ----");
-    console.log("---- ここから ----");
-    console.log(fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8"));
-    console.log("---- ここまで ----");
+    // console.log("---- alfを適切に処理してください ----");
+    // console.log("---- ここから ----");
+    // console.log(fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8"));
+    // console.log("---- ここまで ----");
 
     return fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8");
   }
 
   async createAlfIssue(alf: string, token: string | undefined): Promise<void> {
-    console.log(github.context);
+    const alfName = `Unity_v${this.version}.alf`;
+    const ulfName = `Unity_v${this.version.split(".")[0]}.x.ulf`;
+    const title = `[Actions] Secret '${this.ulfKey}' has been requested by workflow '${github.context.workflow}'`;
+    const body = `### Follow the instructions below to set up secret '${this.ulfKey}'.
 
-    const octokit = new github.GitHub(token || "");
-    const title = `[Actions] Secret '${this.ulfKey}' has been requestd`;
-    const body = `Secret '${this.ulfKey}' has been requestd by workflow '${github.context.workflow}'\n\n
-### 1. 以下のテキストを \`Unity_v${this.version}.alf\` として保存する.\n\n
+1. Save the following text as \`${alfName}\`.  
 \`\`\`
 ${alf}
 \`\`\`
-\n\n
-### 2. 以下のページでマニュアルアクティベートし、ulfをダウンロードする.\n\n
+2. Activate \`${alfName}\` on the following page and download \`${ulfName}\`.  
 https://license.unity3d.com/manual
-\n\n
-### 3. リポジトリのSecretに'${this.ulfKey}'を追加/更新する.\n\n
-URL
-    `;
+3. Add/update the contents of \`${ulfName}\` as secret '${this.ulfKey}'.  
+${github.context.payload.repository?.html_url}/settings/secrets
+`;
 
-    const rr = await octokit.issues.create({
+    await new github.GitHub(token || "").issues.create({
       ...github.context.repo,
       title,
       body
     });
-    console.log(rr.data);
   }
 
   async deactivate(): Promise<void> {

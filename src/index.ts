@@ -46,12 +46,15 @@ export async function install() {
 
   console.log(fs.existsSync(path.join(toolPath, "gem")));
   console.log(process.env["PATH"]);
-  await exec(`echo %PATH%`);
-  
-  if (process.platform == "win32") await exec(`gem.cmd install u3d`);
-  else await exec(`gem install u3d`);
+  await exec(`cmd.exe echo %%PATH%%`);
 
-  await exec("u3d available");
+  if (process.platform == "win32") {
+    await exec(`gem.cmd install u3d`);
+    await exec("u3d.bat available");
+  } else {
+    await exec(`gem install u3d`);
+    await exec("u3d available");
+  }
 }
 
 install();

@@ -59,12 +59,15 @@ function install() {
         process.env["PATH"] += `;${toolPath}`;
         console.log(fs.existsSync(path.join(toolPath, "gem")));
         console.log(process.env["PATH"]);
-        yield exec_1.exec(`echo %PATH%`);
-        if (process.platform == "win32")
+        yield exec_1.exec(`cmd.exe echo %%PATH%%`);
+        if (process.platform == "win32") {
             yield exec_1.exec(`gem.cmd install u3d`);
-        else
+            yield exec_1.exec("u3d.bat available");
+        }
+        else {
             yield exec_1.exec(`gem install u3d`);
-        yield exec_1.exec("u3d available");
+            yield exec_1.exec("u3d available");
+        }
     });
 }
 exports.install = install;

@@ -40,8 +40,12 @@ class Unity {
     }
     u3dRun(args, log, quit = true) {
         return __awaiter(this, void 0, void 0, function* () {
+            const exe = process.platform == "win32"
+                ? `C:\\Program Files\\Unity_${this.version}\\Editor\\Unity.exe`
+                : "u3d";
             const q = quit ? "-quit" : "";
-            const exitCode = yield this.u3d(`-u ${this.version} -- ${q} -batchmode -logFile ${log} -username ${this.username} -password ${this.password} ${args}`);
+            const exitCode = yield exec.exec(`"${exe}" ${q} -batchmode -logFile ${log} -username ${this.username} -password ${this.password} ${args}`);
+            console.log(fs.readFileSync(log, "utf-8"));
             return exitCode;
         });
     }
@@ -70,8 +74,8 @@ class Unity {
             if (!ulf) {
                 return false;
             }
-            fs.writeFileSync(".ulf", (ulf || "").replace('\r', ''), "utf-8");
-            yield this.u3dRun(`-manualLicenseFile .ulf`, 'activate.log');
+            fs.writeFileSync(".ulf", (ulf || "").replace("\r", ""), "utf-8");
+            yield this.u3dRun(`-manualLicenseFile .ulf`, "activate.log");
             console.log(fs.readFileSync("activate.log", "utf-8"));
             yield this.u3d(`licenses`);
             const log = fs.readFileSync("activate.log", "utf-8");
@@ -79,14 +83,14 @@ class Unity {
                 return false;
             }
             console.log("マニュアルアクティベートテスト");
-            const exitCode = yield this.u3dRun(``, 'activate-check.log');
+            const exitCode = yield this.u3dRun(``, "activate-check.log");
             return exitCode == 0;
         });
     }
     createAlf() {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("マニュアルアクティベート作成");
-            yield this.u3dRun(`-createManualActivationFile`, 'createAlf.log');
+            yield this.u3dRun(`-createManualActivationFile`, "createAlf.log");
             console.log(fs.readFileSync("createAlf.log", "utf-8"));
             console.log("マニュアルアクティベート作成完了");
             return fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8");
@@ -95,7 +99,7 @@ class Unity {
     run(projectPath, args) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("プロジェクト実行");
-            const exitCode = yield this.u3dRun(`-projectPath ${projectPath} ${args}`, 'run.log');
+            const exitCode = yield this.u3dRun(`-projectPath ${projectPath} ${args}`, "run.log");
             console.log(fs.readFileSync("run.log", "utf-8"));
             return exitCode;
         });

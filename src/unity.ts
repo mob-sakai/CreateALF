@@ -23,11 +23,21 @@ export class Unity {
     });
   }
 
-  async u3dRun(args: string, log: string, quit: boolean = true): Promise<number> {
+  async u3dRun(
+    args: string,
+    log: string,
+    quit: boolean = true
+  ): Promise<number> {
+    const exe =
+      process.platform == "win32"
+        ? `C:\\Program Files\\Unity_${this.version}\\Editor\\Unity.exe`
+        : "u3d";
+
     const q = quit ? "-quit" : "";
-    const exitCode = await this.u3d(
-      `-u ${this.version} -- ${q} -batchmode -logFile ${log} -username ${this.username} -password ${this.password} ${args}`
+    const exitCode = await exec.exec(
+      `"${exe}" ${q} -batchmode -logFile ${log} -username ${this.username} -password ${this.password} ${args}`
     );
+    console.log(fs.readFileSync(log, "utf-8"));
 
     return exitCode;
   }
@@ -58,8 +68,8 @@ export class Unity {
       return false;
     }
 
-    fs.writeFileSync(".ulf", (ulf || "").replace('\r', ''), "utf-8");
-    await this.u3dRun(`-manualLicenseFile .ulf`, 'activate.log');
+    fs.writeFileSync(".ulf", (ulf || "").replace("\r", ""), "utf-8");
+    await this.u3dRun(`-manualLicenseFile .ulf`, "activate.log");
     console.log(fs.readFileSync("activate.log", "utf-8"));
 
     await this.u3d(`licenses`);
@@ -70,13 +80,13 @@ export class Unity {
     }
 
     console.log("マニュアルアクティベートテスト");
-    const exitCode = await this.u3dRun(``, 'activate-check.log');
+    const exitCode = await this.u3dRun(``, "activate-check.log");
     return exitCode == 0;
   }
 
   async createAlf(): Promise<string> {
     console.log("マニュアルアクティベート作成");
-    await this.u3dRun(`-createManualActivationFile`, 'createAlf.log');
+    await this.u3dRun(`-createManualActivationFile`, "createAlf.log");
     console.log(fs.readFileSync("createAlf.log", "utf-8"));
 
     console.log("マニュアルアクティベート作成完了");
@@ -85,7 +95,10 @@ export class Unity {
 
   async run(projectPath: string, args: string): Promise<number> {
     console.log("プロジェクト実行");
-    const exitCode = await this.u3dRun(`-projectPath ${projectPath} ${args}`, 'run.log');
+    const exitCode = await this.u3dRun(
+      `-projectPath ${projectPath} ${args}`,
+      "run.log"
+    );
     console.log(fs.readFileSync("run.log", "utf-8"));
     return exitCode;
   }

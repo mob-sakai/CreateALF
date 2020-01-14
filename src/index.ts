@@ -27,7 +27,7 @@ async function Run() {
   await unityInstaller.ExecuteSetUp(version, option);
 }
 
-export function findRubyVersion(version: string): string {
+export function findRubyVersion(version: string) {
   const installDir: string | null = tc.find("Ruby", version);
 
   if (!installDir) {
@@ -37,7 +37,20 @@ export function findRubyVersion(version: string): string {
   const toolPath: string = path.join(installDir, "bin");
 
   core.addPath(toolPath);
-  return toolPath;
+}
+
+class Inst {
+  version: string;
+  gem: string = 'gem';
+  u3d: string = 'u3d';
+  constructor(version: string){
+      this.version = version;
+      if(process.platform == "win32")
+      {
+        this.gem += '.cmd';
+        this.u3d += '.bat';
+      }
+  }
 }
 
 export async function gem(args: string) {
@@ -63,7 +76,7 @@ export async function installUnity(
 }
 
 export async function install() {
-  const toolPath = findRubyVersion("2.6.x");
+  findRubyVersion("2.6.x");
   // process.env["PATH"] += `;${toolPath}`;
 
   // console.log(fs.existsSync(path.join(toolPath, "gem")));
@@ -72,13 +85,13 @@ export async function install() {
   const version = "2018.3.13f1";
 
   if (process.platform == "win32") {
-    installUnity(version, 'WebGL');
+    await installUnity(version, 'WebGL');
     // await exec(`gem.cmd install u3d`);
     // await exec(`u3d.bat available`);
     // await exec(`u3d.bat install ${version}`);
     // await exec(`u3d.bat install ${version} -p WebGL`);
     // await exec(`u3d.bat list`);
-    tc.cacheDir(`C:\\Program Files\\Unity_${version}`, "Unity", "2018.3.13-f1");
+    await tc.cacheDir(`C:\\Program Files\\Unity_${version}`, "Unity", "2018.3.13-f1");
     console.log(tc.find("Unity", "2018.3.13-f1"));
     console.log('finish !!!');
   } else {

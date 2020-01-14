@@ -4,6 +4,7 @@ import { getInput, setOutput } from "@actions/core";
 import * as tc from "@actions/tool-cache";
 import * as core from "@actions/core";
 import * as path from "path";
+import * as fs from "fs";
 import { exec } from "@actions/exec";
 import { stringify } from "querystring";
 
@@ -41,9 +42,13 @@ export function findRubyVersion(version: string) :string {
 
 export async function install() {
   const toolPath = findRubyVersion("2.6.x");
+  process.env['PATH'] += ";toolPath";
 
-  console.log(path.join(toolPath, "gem"));
-  await exec(`${path.join(toolPath, "gem")} install u3d`);
+  console.log(fs.readdirSync(toolPath));
+
+
+
+  await exec('gem install u3d');
   await exec("u3d available");
 }
 

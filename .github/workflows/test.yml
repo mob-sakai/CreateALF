@@ -13,5 +13,6 @@ jobs:
       with:
         unity-version: ${{ matrix.unity-version }}
 
-    - run: \"C:\\Program Files\\Unity\\Editor\\Unity.exe\" -quit -batchMode -logFile -noGraphics -createManualActivationFile || exit /b 0
-    - run: type Unity_v${{ matrix.unity-version }}.alf
+    - run:  |
+      & 'C:\Program Files\Unity\Editor\Unity.exe' -quit -batchMode -nographics -logfile -createManualActivationFile
+    - run: cat Unity_v${{ matrix.unity-version }}.alf

@@ -7,6 +7,8 @@ import * as fs from "fs";
 export class Unity {
   version: string;
   packages: string;
+  username: string = "";
+  password: string = "";
   constructor(version: string, packages: string) {
     this.version = version;
     this.packages = packages;
@@ -24,7 +26,7 @@ export class Unity {
   async u3dRun(args: string, log: string, quit: boolean = true): Promise<number> {
     const q = quit ? "-quit" : "";
     const exitCode = await this.u3d(
-      `-u ${this.version} -- ${q} -batchmode -logFile ${log} ${args}`
+      `-u ${this.version} -- ${q} -batchmode -logFile ${log} -username ${this.username} -password ${this.password} ${args}`
     );
 
     return exitCode;

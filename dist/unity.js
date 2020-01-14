@@ -23,6 +23,8 @@ const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 class Unity {
     constructor(version, packages) {
+        this.username = "";
+        this.password = "";
         this.version = version;
         this.packages = packages;
     }
@@ -39,7 +41,7 @@ class Unity {
     u3dRun(args, log, quit = true) {
         return __awaiter(this, void 0, void 0, function* () {
             const q = quit ? "-quit" : "";
-            const exitCode = yield this.u3d(`-u ${this.version} -- ${q} -batchmode -logFile ${log} ${args}`);
+            const exitCode = yield this.u3d(`-u ${this.version} -- ${q} -batchmode -logFile ${log} -username ${this.username} -password ${this.password} ${args}`);
             return exitCode;
         });
     }

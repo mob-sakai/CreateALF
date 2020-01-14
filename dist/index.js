@@ -29,7 +29,11 @@ function run() {
         const secrets = JSON.parse(core.getInput("secrets", { required: true }));
         const ulfKey = `ULF_${utility.getPlatform()}_${version.split(".")[0]}`;
         const ulf = secrets[ulfKey];
+        const username = secrets["UNITY_USERNAME"];
+        const password = secrets["UNITY_PASSWORD"];
         const unity = new unity_1.Unity(version, modules);
+        unity.username = username;
+        unity.password = password;
         yield unity.install();
         if (yield unity.activate(ulf)) {
             const exitCode = yield unity.run(project_path, args);

@@ -12,8 +12,13 @@ async function run() {
 
   const ulfKey = `ULF_${utility.getPlatform()}_${version.split(".")[0]}`;
   const ulf = secrets[ulfKey];
+  const username = secrets["UNITY_USERNAME"];
+  const password = secrets["UNITY_PASSWORD"];
+
 
   const unity = new Unity(version, modules);
+  unity.username = username;
+  unity.password = password;
   await unity.install();
 
   if (await unity.activate(ulf)) {

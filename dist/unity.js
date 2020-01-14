@@ -44,7 +44,11 @@ class Unity {
                 ? `C:\\Program Files\\Unity_${this.version}\\Editor\\Unity.exe`
                 : "u3d";
             const q = quit ? "-quit" : "";
-            const exitCode = yield exec.exec(`"${exe}" ${q} -batchmode -logFile ${log} -username ${this.username} -password ${this.password} ${args}`);
+            const exitCode = yield exec.exec(`"${exe}" ${q} -batchmode -logFile ${log} -username ${this.username} -password ${this.password} ${args}`, [], {
+                failOnStdErr: false,
+                ignoreReturnCode: true,
+                windowsVerbatimArguments: true
+            });
             console.log(fs.readFileSync(log, "utf-8"));
             return exitCode;
         });

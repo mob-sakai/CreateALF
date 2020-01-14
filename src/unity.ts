@@ -35,7 +35,13 @@ export class Unity {
 
     const q = quit ? "-quit" : "";
     const exitCode = await exec.exec(
-      `"${exe}" ${q} -batchmode -logFile ${log} -username ${this.username} -password ${this.password} ${args}`
+      `"${exe}" ${q} -batchmode -logFile ${log} -username ${this.username} -password ${this.password} ${args}`,
+      [],
+      {
+        failOnStdErr: false,
+        ignoreReturnCode: true,
+        windowsVerbatimArguments: true
+      }
     );
     console.log(fs.readFileSync(log, "utf-8"));
 

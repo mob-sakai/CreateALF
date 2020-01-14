@@ -41,13 +41,21 @@ class Unity {
     this.packages = packages;
   }
 
-  async u3d(args: string) {
+  async u3d(args: string): Promise<number> {
     const exe = process.platform == "win32" ? "u3d.bat" : "u3d";
-    await exec(`${exe} ${args}`, [], {
+    return exec(`${exe} ${args}`, [], {
       failOnStdErr: false,
       ignoreReturnCode: true,
       windowsVerbatimArguments: true
     });
+  }
+  // `-t -u ${this.version} -- -quit -batchmode -nographics -manualLicenseFile .ulf -logFile .log`
+  async u3dRun(args: string, quit: boolean = true): Promise<number> {
+    const exe = process.platform == "win32" ? "u3d.bat" : "u3d";
+    const q = quit ? "-quit" : "";
+    return this.u3d(
+      `-t -u ${this.version} -- ${q} -batchmode -nographics ${args}`
+    );
   }
 
   async gem(args: string) {
@@ -66,14 +74,14 @@ class Unity {
     await this.u3d(`install ${this.version}`);
 
     if (this.packages) {
+      console.log("Unityパッケージをインストールします");
       await this.u3d(`install ${this.version} -p ${this.packages}`);
     }
   }
 
   async createAlf(): Promise<void> {
-    await this.u3d(
-      `-t -u ${this.version} -- -quit -batchmode -nographics -createManualActivationFile`
-    );
+    await this.u3dRun(`-createManualActivationFile -logFile .log`);
+    console.log(fs.readFileSync(".log", "utf-8"));
 
     console.log("---- alfを適切に処理してください ----");
     console.log("---- ここから ----");
@@ -92,22 +100,26 @@ class Unity {
       return;
     }
 
+    console.log("マニュアルアクティベート実行");
     fs.writeFileSync(".ulf", ulf || "", "utf-8");
-    await this.u3d(
-      `-t -u ${this.version} -- -quit -batchmode -nographics -manualLicenseFile .ulf -logFile .log`
-    );
-    const activated = / Next license update check is after /.test(
-      fs.readFileSync(".log", "utf-8")
-    );
-    if (!activated) {
+    await this.u3dRun(`-manualLicenseFile .ulf -logFile .log`);
+    console.log(fs.readFileSync(".log", "utf-8"));
+
+    const log = fs.readFileSync(".log", "utf-8");
+    if (!/ Next license update check is after /.test(log)) {
       console.log("アクティベートに失敗");
       core.setFailed(`Secret is not available.`);
       await this.createAlf();
     }
 
-    await this.u3d(
-      `-t -u ${this.version} -- -projectPath ${projectPath} -batchmode -nographics ${args}`
-    );
+    console.log("プロジェクト実行");
+    const code = await this.u3dRun(`-projectPath ${projectPath} ${args}`);
+    console.log("プロジェクト終了");
+    console.log(`exit code = ${code}`);
+
+    console.log("マニュアルアクティベート返却");
+    await this.u3dRun(`-returnlicense -logFile .log`);
+    console.log(fs.readFileSync(".log", "utf-8"));
   }
 }
 

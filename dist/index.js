@@ -54,11 +54,19 @@ class Unity {
     u3d(args) {
         return __awaiter(this, void 0, void 0, function* () {
             const exe = process.platform == "win32" ? "u3d.bat" : "u3d";
-            yield exec_1.exec(`${exe} ${args}`, [], {
+            return exec_1.exec(`${exe} ${args}`, [], {
                 failOnStdErr: false,
                 ignoreReturnCode: true,
                 windowsVerbatimArguments: true
             });
+        });
+    }
+    // `-t -u ${this.version} -- -quit -batchmode -nographics -manualLicenseFile .ulf -logFile .log`
+    u3dRun(args, quit = true) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const exe = process.platform == "win32" ? "u3d.bat" : "u3d";
+            const q = quit ? "-quit" : "";
+            return this.u3d(`-t -u ${this.version} -- ${q} -batchmode -nographics ${args}`);
         });
     }
     gem(args) {
@@ -76,13 +84,15 @@ class Unity {
             console.log("Unityをインストールします");
             yield this.u3d(`install ${this.version}`);
             if (this.packages) {
+                console.log("Unityパッケージをインストールします");
                 yield this.u3d(`install ${this.version} -p ${this.packages}`);
             }
         });
     }
     createAlf() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.u3d(`-t -u ${this.version} -- -quit -batchmode -nographics -createManualActivationFile`);
+            yield this.u3dRun(`-createManualActivationFile -logFile .log`);
+            console.log(fs.readFileSync(".log", "utf-8"));
             console.log("---- alfを適切に処理してください ----");
             console.log("---- ここから ----");
             console.log(fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8"));
@@ -96,15 +106,23 @@ class Unity {
                 yield this.createAlf();
                 return;
             }
+            console.log("マニュアルアクティベート実行");
             fs.writeFileSync(".ulf", ulf || "", "utf-8");
-            yield this.u3d(`-t -u ${this.version} -- -quit -batchmode -nographics -manualLicenseFile .ulf -logFile .log`);
-            const activated = / Next license update check is after /.test(fs.readFileSync(".log", "utf-8"));
-            if (!activated) {
+            yield this.u3dRun(`-manualLicenseFile .ulf -logFile .log`);
+            console.log(fs.readFileSync(".log", "utf-8"));
+            const log = fs.readFileSync(".log", "utf-8");
+            if (!/ Next license update check is after /.test(log)) {
                 console.log("アクティベートに失敗");
                 core.setFailed(`Secret is not available.`);
                 yield this.createAlf();
             }
-            yield this.u3d(`-t -u ${this.version} -- -projectPath ${projectPath} -batchmode -nographics ${args}`);
+            console.log("プロジェクト実行");
+            const code = yield this.u3dRun(`-projectPath ${projectPath} ${args}`);
+            console.log("プロジェクト終了");
+            console.log(`exit code = ${code}`);
+            console.log("マニュアルアクティベート返却");
+            yield this.u3dRun(`-returnlicense -logFile .log`);
+            console.log(fs.readFileSync(".log", "utf-8"));
         });
     }
 }

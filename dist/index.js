@@ -59,7 +59,7 @@ function install() {
         process.env['PATH'] += `;${toolPath}`;
         console.log(fs.existsSync(path.join(toolPath, 'gem')));
         console.log(process.env['PATH']);
-        yield exec_1.exec(`${path.join(toolPath, 'gem')} install u3d`);
+        yield exec_1.exec(`gem install u3d`);
         yield exec_1.exec("u3d available");
     });
 }

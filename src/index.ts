@@ -46,7 +46,7 @@ export async function install() {
 
   console.log( fs.existsSync(path.join(toolPath, 'gem')));
   console.log( process.env['PATH']);
-  await exec(`${path.join(toolPath, 'gem')} install u3d`);
+  await exec(`gem install u3d`);
   await exec("u3d available");
 }
 

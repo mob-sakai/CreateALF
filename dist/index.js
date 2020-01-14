@@ -20,15 +20,15 @@ const unity_1 = require("./unity");
 const utility = __importStar(require("./utility"));
 const core = __importStar(require("@actions/core"));
 const github = __importStar(require("@actions/github"));
-function Run() {
+function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const version_ = "2018.3.11f1";
         const modules = "";
         const project_path = ".";
         const args = "";
         const secrets = JSON.parse(core.getInput("secrets", { required: true }));
-        const ulfSecret = `UNITY_${utility.getPlatform()}_${version_.split(".")[0]}`;
-        const ulf = secrets[ulfSecret];
+        const ulfKey = `ULF_${utility.getPlatform()}_${version_.split(".")[0]}`;
+        const ulf = secrets[ulfKey];
         const unity = new unity_1.Unity(version_, modules);
         yield unity.install();
         if (yield unity.activate(ulf)) {
@@ -38,17 +38,17 @@ function Run() {
         else {
             const alf = yield unity.createAlf();
             const token = secrets["GITHUB_TOKEN"];
-            const res = yield createAlfIssue(alf, version_, ulfSecret, token);
-            const message = `Secret '${ulfSecret}' is not available. For detail, see ${res.data.url}`;
+            const res = yield createAlfIssue(alf, version_, ulfKey, token);
+            const message = `Secret '${ulfKey}' is not available. For detail, see ${res.data.url}`;
             core.setFailed(message);
         }
-        function createAlfIssue(alf, version, ulfSecret, token) {
+        function createAlfIssue(alf, version, ulfKey, token) {
             var _a;
             return __awaiter(this, void 0, void 0, function* () {
                 const alfName = `Unity_v${version}.alf`;
                 const ulfName = `Unity_v${version.split(".")[0]}.x.ulf`;
-                const title = `[Actions] Secret '${ulfSecret}' has been requested by workflow '${github.context.workflow}'`;
-                const body = `### Follow the instructions below to set up secret \`${ulfSecret}\`.
+                const title = `[Actions] Secret '${ulfKey}' has been requested by workflow '${github.context.workflow}'`;
+                const body = `### Follow the instructions below to set up secret \`${ulfKey}\`.
 
 1. Save the following text as \`${alfName}\`.  
 \`\`\`
@@ -56,11 +56,11 @@ ${alf}
 \`\`\`
 2. Activate \`${alfName}\` on the following page and download \`${ulfName}\`.  
 https://license.unity3d.com/manual
-3. Add/update the contents of \`${ulfName}\` as secret \`${ulfSecret}\`.  
+3. Add/update the contents of \`${ulfName}\` as secret \`${ulfKey}\`.  
 ${(_a = github.context.payload.repository) === null || _a === void 0 ? void 0 : _a.html_url}/settings/secrets`;
                 return utility.createIssue(title, body, token);
             });
         }
     });
 }
-Run();
+run();

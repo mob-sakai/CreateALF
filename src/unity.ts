@@ -74,8 +74,9 @@ export class Unity {
       return false;
     }
 
-    fs.writeFileSync(".ulf", (ulf || "").replace("\r", ""), "utf-8");
-    await this.u3dRun(`-manualLicenseFile .ulf`, "activate.log");
+    const ulfPath = `Unity_v${this.version.split(".")[0]}.x.ulf`;
+    fs.writeFileSync(ulfPath, (ulf || "").replace("\r", ""), "utf-8");
+    await this.u3dRun(`-manualLicenseFile ${ulfPath}`, "activate.log");
     console.log(fs.readFileSync("activate.log", "utf-8"));
 
     await this.u3d(`licenses`);

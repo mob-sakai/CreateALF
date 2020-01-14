@@ -4,6 +4,7 @@ import { getInput, setOutput } from "@actions/core";
 import * as tc from "@actions/tool-cache";
 import * as core from "@actions/core";
 import * as path from "path";
+import { exec } from "@actions/exec";
 
 async function Run() {
   const version = getInput("unity-version", { required: true });
@@ -36,22 +37,11 @@ export async function findRubyVersion(version: string) {
   core.addPath(toolPath);
 }
 
-export async function findU3d() {
-  const versions: string[] = tc.findAllVersions("u3d");
+export async function install() {
+  findRubyVersion("2.6.x");
 
-  console.log("u3d");
-  console.log(versions);
-
-  // if (!installDir) {
-  //   throw new Error(`Version ${version} not found`);
-  // }
-
-  // const toolPath: string = path.join(installDir, "bin");
-
-  // core.addPath(toolPath);
+  await exec("gem install u3d");
+  await exec("u3d available");
 }
 
-// Run();
-
-findRubyVersion('2.6.x');
-findU3d();
+install();

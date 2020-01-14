@@ -21,6 +21,7 @@ const core_1 = require("@actions/core");
 const tc = __importStar(require("@actions/tool-cache"));
 const core = __importStar(require("@actions/core"));
 const path = __importStar(require("path"));
+const exec_1 = require("@actions/exec");
 function Run() {
     return __awaiter(this, void 0, void 0, function* () {
         const version = core_1.getInput("unity-version", { required: true });
@@ -52,19 +53,12 @@ function findRubyVersion(version) {
     });
 }
 exports.findRubyVersion = findRubyVersion;
-function findU3d() {
+function install() {
     return __awaiter(this, void 0, void 0, function* () {
-        const versions = tc.findAllVersions("u3d");
-        console.log("u3d");
-        console.log(versions);
-        // if (!installDir) {
-        //   throw new Error(`Version ${version} not found`);
-        // }
-        // const toolPath: string = path.join(installDir, "bin");
-        // core.addPath(toolPath);
+        findRubyVersion("2.6.x");
+        yield exec_1.exec("gem install u3d");
+        yield exec_1.exec("u3d available");
     });
 }
-exports.findU3d = findU3d;
-// Run();
-findRubyVersion('2.6.x');
-findU3d();
+exports.install = install;
+install();

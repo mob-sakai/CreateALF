@@ -36,17 +36,19 @@ function Run() {
             yield unity.deactivate();
         }
         else {
-            core.setFailed(`Secret '${ulfSecret}' is undefined.`);
             const alf = yield unity.createAlf();
             const token = secrets["GITHUB_TOKEN"];
-            createAlfIssue(alf, version_, ulfSecret, token);
+            const res = yield createAlfIssue(alf, version_, ulfSecret, token);
+            const message = `Secret '${ulfSecret}' is not available. For detail, see ${res.data.url}`;
+            core.setFailed(message);
         }
         function createAlfIssue(alf, version, ulfSecret, token) {
             var _a;
-            const alfName = `Unity_v${version}.alf`;
-            const ulfName = `Unity_v${version.split(".")[0]}.x.ulf`;
-            const title = `[Actions] Secret '${ulfSecret}' has been requested by workflow '${github.context.workflow}'`;
-            const body = `### Follow the instructions below to set up secret \`${ulfSecret}\`.
+            return __awaiter(this, void 0, void 0, function* () {
+                const alfName = `Unity_v${version}.alf`;
+                const ulfName = `Unity_v${version.split(".")[0]}.x.ulf`;
+                const title = `[Actions] Secret '${ulfSecret}' has been requested by workflow '${github.context.workflow}'`;
+                const body = `### Follow the instructions below to set up secret \`${ulfSecret}\`.
 
 1. Save the following text as \`${alfName}\`.  
 \`\`\`
@@ -56,7 +58,8 @@ ${alf}
 https://license.unity3d.com/manual
 3. Add/update the contents of \`${ulfName}\` as secret \`${ulfSecret}\`.  
 ${(_a = github.context.payload.repository) === null || _a === void 0 ? void 0 : _a.html_url}/settings/secrets`;
-            utility.createIssue(title, body, token);
+                return utility.createIssue(title, body, token);
+            });
         }
     });
 }

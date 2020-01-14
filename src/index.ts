@@ -19,14 +19,14 @@ async function Run() {
     await unity.run(project_path, args);
     await unity.deactivate();
   } else {
-    core.setFailed(`Secret '${ulfSecret}' is undefined.`);
-
     const alf = await unity.createAlf();
     const token = secrets["GITHUB_TOKEN"];
-    createAlfIssue(alf, version_, ulfSecret, token);
+    const res = await createAlfIssue(alf, version_, ulfSecret, token);
+    const message = `Secret '${ulfSecret}' is not available. For detail, see ${res.data.url}`;
+    core.setFailed(message);
   }
 
-  function createAlfIssue(
+  async function createAlfIssue(
     alf: string,
     version: string,
     ulfSecret: string,
@@ -45,7 +45,7 @@ ${alf}
 https://license.unity3d.com/manual
 3. Add/update the contents of \`${ulfName}\` as secret \`${ulfSecret}\`.  
 ${github.context.payload.repository?.html_url}/settings/secrets`;
-    utility.createIssue(title, body, token);
+    return utility.createIssue(title, body, token);
   }
 }
 

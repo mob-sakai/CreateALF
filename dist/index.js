@@ -52,29 +52,47 @@ function findRubyVersion(version) {
     return toolPath;
 }
 exports.findRubyVersion = findRubyVersion;
+function gem(args) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const exe = process.platform == 'win32' ? 'gem.cmd' : 'gem';
+        yield exec_1.exec(`${exe} ${args}`);
+    });
+}
+exports.gem = gem;
+function u3d(args) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const exe = process.platform == 'win32' ? 'u3d.bat' : 'u3d';
+        yield exec_1.exec(`${exe} ${args}`);
+    });
+}
+exports.u3d = u3d;
 function install() {
     return __awaiter(this, void 0, void 0, function* () {
         const toolPath = findRubyVersion("2.6.x");
         // process.env["PATH"] += `;${toolPath}`;
         // console.log(fs.existsSync(path.join(toolPath, "gem")));
         // console.log(process.env["PATH"]);
-        const version = "2018.3.14f1";
+        const version = "2018.3.13f1";
         if (process.platform == "win32") {
             yield exec_1.exec(`gem.cmd install u3d`);
             yield exec_1.exec(`u3d.bat available`);
             yield exec_1.exec(`u3d.bat install ${version}`);
             yield exec_1.exec(`u3d.bat install ${version} -p WebGL`);
-            tc.cacheDir(`C:\\Program Files\\Unity_${version}`, 'Unity', version);
+            yield exec_1.exec(`u3d.bat list`);
+            tc.cacheDir(`C:\\Program Files\\Unity_${version}`, "Unity", version);
+            console.log(tc.find("Unity", version));
         }
         else {
             yield exec_1.exec(`gem install u3d`);
             yield exec_1.exec(`u3d available`);
             yield exec_1.exec(`u3d install ${version}`);
             yield exec_1.exec(`u3d install ${version} -p WebGL`);
+            yield exec_1.exec(`u3d list`);
             if (process.platform == "darwin")
-                tc.cacheDir(`/Application/Unity_${version}`, 'Unity', version);
+                tc.cacheDir(`/Application/Unity_${version}`, "Unity", version);
             else
-                tc.cacheDir(`/opt/unity-ediotr-${version}`, 'Unity', version);
+                tc.cacheDir(`/opt/unity-ediotr-${version}`, "Unity", version);
+            console.log(tc.find("Unity", version));
         }
     });
 }

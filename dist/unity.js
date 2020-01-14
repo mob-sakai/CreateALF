@@ -79,7 +79,7 @@ class Unity {
             }
             const ulfPath = `Unity_v${this.version.split(".")[0]}.x.ulf`;
             fs.writeFileSync(ulfPath, (ulf || "").replace("\r", ""), "utf-8");
-            yield this.u3dRun(`-quit -batchmode -manualLicenseFile ${ulfPath}`, "activate.log");
+            yield this.u3dRun(`-nographics -quit -batchmode -manualLicenseFile ${ulfPath}`, "activate.log");
             console.log(fs.readFileSync("activate.log", "utf-8"));
             yield this.u3d(`licenses`);
             const log = fs.readFileSync("activate.log", "utf-8");
@@ -87,14 +87,14 @@ class Unity {
                 return false;
             }
             console.log("マニュアルアクティベートテスト");
-            const exitCode = yield this.u3dRun(`-quit -batchmode`, "activate-check.log");
+            const exitCode = yield this.u3dRun(`-nographics -quit -batchmode`, "activate-check.log");
             return exitCode == 0;
         });
     }
     createAlf() {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("マニュアルアクティベート作成");
-            yield this.u3dRun(`-quit -batchmode -createManualActivationFile`, "createAlf.log");
+            yield this.u3dRun(`-nographics -quit -batchmode -createManualActivationFile`, "createAlf.log");
             console.log(fs.readFileSync("createAlf.log", "utf-8"));
             console.log("マニュアルアクティベート作成完了");
             return fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8");
@@ -103,7 +103,7 @@ class Unity {
     run(projectPath, args) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("プロジェクト実行");
-            const exitCode = yield this.u3dRun(`-batchmode -projectPath ${projectPath} ${args}`, "run.log");
+            const exitCode = yield this.u3dRun(`-quit -nographics -batchmode -projectPath ${projectPath} ${args}`, "run.log");
             console.log(fs.readFileSync("run.log", "utf-8"));
             return exitCode;
         });

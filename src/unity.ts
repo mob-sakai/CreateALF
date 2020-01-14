@@ -75,7 +75,7 @@ export class Unity {
 
     const ulfPath = `Unity_v${this.version.split(".")[0]}.x.ulf`;
     fs.writeFileSync(ulfPath, (ulf || "").replace("\r", ""), "utf-8");
-    await this.u3dRun(`-quit -batchmode -manualLicenseFile ${ulfPath}`, "activate.log");
+    await this.u3dRun(`-nographics -quit -batchmode -manualLicenseFile ${ulfPath}`, "activate.log");
     console.log(fs.readFileSync("activate.log", "utf-8"));
 
     await this.u3d(`licenses`);
@@ -86,13 +86,13 @@ export class Unity {
     }
 
     console.log("マニュアルアクティベートテスト");
-    const exitCode = await this.u3dRun(`-quit -batchmode`, "activate-check.log");
+    const exitCode = await this.u3dRun(`-nographics -quit -batchmode`, "activate-check.log");
     return exitCode == 0;
   }
 
   async createAlf(): Promise<string> {
     console.log("マニュアルアクティベート作成");
-    await this.u3dRun(`-quit -batchmode -createManualActivationFile`, "createAlf.log");
+    await this.u3dRun(`-nographics -quit -batchmode -createManualActivationFile`, "createAlf.log");
     console.log(fs.readFileSync("createAlf.log", "utf-8"));
 
     console.log("マニュアルアクティベート作成完了");
@@ -102,7 +102,7 @@ export class Unity {
   async run(projectPath: string, args: string): Promise<number> {
     console.log("プロジェクト実行");
     const exitCode = await this.u3dRun(
-      `-batchmode -projectPath ${projectPath} ${args}`,
+      `-quit -nographics -batchmode -projectPath ${projectPath} ${args}`,
       "run.log"
     );
     console.log(fs.readFileSync("run.log", "utf-8"));

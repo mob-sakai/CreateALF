@@ -66,5 +66,5 @@ function findU3d() {
 }
 exports.findU3d = findU3d;
 // Run();
-findRubyVersion('2.6.2');
+findRubyVersion('2.6.x');
 findU3d();

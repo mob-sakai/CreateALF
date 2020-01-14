@@ -53,5 +53,5 @@ export async function findU3d() {
 
 // Run();
 
-findRubyVersion('2.6.2');
+findRubyVersion('2.6.x');
 findU3d();

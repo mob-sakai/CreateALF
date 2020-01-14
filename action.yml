@@ -20,7 +20,7 @@ inputs:
   secrets:
     description: '[Required] Secret json to activate Unity Editor.'
     require: false
-    default: "{ ULF_WIN_2018: ${{ secret.ULF_WIN_2018 }} }"
+    default: '{}'
 outputs: {}
 runs:
   using: 'node12'

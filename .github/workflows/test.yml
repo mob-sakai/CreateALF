@@ -27,6 +27,6 @@ jobs:
     - uses: ./
       with: 
         unity-version: ${{ matrix.unity-version }}
-        # secrets: ${{ toJson(secrets) }}
+        secrets: ${{ toJson(secrets) }}
         project-path: 'demo'
         # args: 'hogehoge'

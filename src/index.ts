@@ -8,6 +8,7 @@ import * as fs from "fs";
 import { exec } from "@actions/exec";
 import { stringify } from "querystring";
 import * as io from "@actions/io";
+import * as github from "@actions/github";
 import { eventNames } from "cluster";
 
 async function Run() {
@@ -39,9 +40,19 @@ async function Run() {
   const args = "";
 
   const u = new Unity(version_, modules);
-  const ulf = JSON.parse(getInput("secrets", { required: true }))[u.ulfKey];
+  const secrets =JSON.parse(getInput("secrets", { required: true }));
+  // const ulf = JSON.parse(getInput("secrets", { required: true }))[u.ulfKey];
+  // const token = JSON.parse(getInput("secrets", { required: true }))[];
+
+  const octokit = new github.GitHub(secrets['GITHUB_TOKEN'] || '');
+  const rr = await octokit.issues.create({...github.context.repo, title: 'hogehoge!!!', body: 'fugauga!!!' });
+  console.log(rr.data);
+  return;
+
+
+
   await u.install();
-  if (await u.activate(ulf)) {
+  if (await u.activate(secrets[u.ulfKey], secrets['GITHUB_TOKEN'])) {
     await u.run(project_path, args);
     await u.deactivate();
   }
@@ -104,11 +115,11 @@ class Unity {
     }
   }
 
-  async activate(ulf: string | undefined): Promise<boolean> {
+  async activate(ulf: string | undefined, token: string | undefined): Promise<boolean> {
     if (!ulf) {
       console.log("ulfがない");
       core.setFailed(`Secret '${this.ulfKey}' is undefined.`);
-      await this.createAlf();
+      await this.createAlf(token);
       return false;
     }
 
@@ -121,7 +132,7 @@ class Unity {
     if (!/ Next license update check is after /.test(log)) {
       console.log("アクティベートに失敗");
       core.setFailed(`Secret is not available.`);
-      await this.createAlf();
+      await this.createAlf(token);
       return false;
     }
 
@@ -129,7 +140,7 @@ class Unity {
     return true;
   }
 
-  async createAlf(): Promise<void> {
+  async createAlf(token: string | undefined): Promise<void> {
     await this.u3dRun(`-createManualActivationFile -logFile .log`);
     console.log(fs.readFileSync(".log", "utf-8"));
 
@@ -137,7 +148,11 @@ class Unity {
     console.log("---- ここから ----");
     console.log(fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8"));
     console.log("---- ここまで ----");
-  }
+
+    const octokit = new github.GitHub(token || '');
+    const rr = await octokit.issues.create({...github.context.repo, title: 'hogehoge!!!', body: 'fugauga!!!' });
+    console.log(rr.data);
+  } 
 
   async deactivate(): Promise<void> {
     console.log("マニュアルアクティベート返却");

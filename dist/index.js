@@ -23,6 +23,7 @@ const core = __importStar(require("@actions/core"));
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 const exec_1 = require("@actions/exec");
+const github = __importStar(require("@actions/github"));
 function Run() {
     return __awaiter(this, void 0, void 0, function* () {
         const version = core_1.getInput("unity-version", { required: true });
@@ -50,9 +51,15 @@ function Run() {
         const project_path = ".";
         const args = "";
         const u = new Unity(version_, modules);
-        const ulf = JSON.parse(core_1.getInput("secrets", { required: true }))[u.ulfKey];
+        const secrets = JSON.parse(core_1.getInput("secrets", { required: true }));
+        // const ulf = JSON.parse(getInput("secrets", { required: true }))[u.ulfKey];
+        // const token = JSON.parse(getInput("secrets", { required: true }))[];
+        const octokit = new github.GitHub(secrets['GITHUB_TOKEN'] || '');
+        const rr = yield octokit.issues.create(Object.assign(Object.assign({}, github.context.repo), { title: 'hogehoge!!!', body: 'fugauga!!!' }));
+        console.log(rr.data);
+        return;
         yield u.install();
-        if (yield u.activate(ulf)) {
+        if (yield u.activate(secrets[u.ulfKey], secrets['GITHUB_TOKEN'])) {
             yield u.run(project_path, args);
             yield u.deactivate();
         }
@@ -109,12 +116,12 @@ class Unity {
             }
         });
     }
-    activate(ulf) {
+    activate(ulf, token) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!ulf) {
                 console.log("ulfがない");
                 core.setFailed(`Secret '${this.ulfKey}' is undefined.`);
-                yield this.createAlf();
+                yield this.createAlf(token);
                 return false;
             }
             console.log("マニュアルアクティベート実行");
@@ -125,14 +132,14 @@ class Unity {
             if (!/ Next license update check is after /.test(log)) {
                 console.log("アクティベートに失敗");
                 core.setFailed(`Secret is not available.`);
-                yield this.createAlf();
+                yield this.createAlf(token);
                 return false;
             }
             console.log("マニュアルアクティベート終了");
             return true;
         });
     }
-    createAlf() {
+    createAlf(token) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.u3dRun(`-createManualActivationFile -logFile .log`);
             console.log(fs.readFileSync(".log", "utf-8"));
@@ -140,6 +147,9 @@ class Unity {
             console.log("---- ここから ----");
             console.log(fs.readFileSync(`Unity_v${this.version}.alf`, "utf-8"));
             console.log("---- ここまで ----");
+            const octokit = new github.GitHub(token || '');
+            const rr = yield octokit.issues.create(Object.assign(Object.assign({}, github.context.repo), { title: 'hogehoge!!!', body: 'fugauga!!!' }));
+            console.log(rr.data);
         });
     }
     deactivate() {

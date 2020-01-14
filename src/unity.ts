@@ -56,7 +56,7 @@ export class Unity {
       return false;
     }
 
-    fs.writeFileSync(".ulf", ulf || "", "utf-8");
+    fs.writeFileSync(".ulf", (ulf || "").replace('\r', ''), "utf-8");
     await this.u3dRun(`-manualLicenseFile .ulf`, 'activate.log');
     console.log(fs.readFileSync("activate.log", "utf-8"));
 

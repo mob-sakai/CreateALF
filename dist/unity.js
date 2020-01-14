@@ -32,7 +32,7 @@ class Unity {
             return exec.exec(`${exe} ${args}`, [], {
                 failOnStdErr: false,
                 ignoreReturnCode: true,
-                windowsVerbatimArguments: true,
+                windowsVerbatimArguments: true
             });
         });
     }
@@ -91,11 +91,6 @@ class Unity {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("プロジェクト実行");
             return this.u3dRun(`-projectPath ${projectPath} ${args}`);
-            // console.log("プロジェクト終了");
-            // console.log(`exit code = ${code}`);
-            // if (code != 0) {
-            //   core.setFailed("Unity failed with exit code 1");
-            // }
         });
     }
 }

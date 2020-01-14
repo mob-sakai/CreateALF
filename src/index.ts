@@ -2,6 +2,8 @@ import { CreateInstaller } from "./Installers/installer";
 import { InstallOption } from "./Installers/installer_definition";
 import { getInput, setOutput } from "@actions/core";
 import * as tc from "@actions/tool-cache";
+import * as core from "@actions/core";
+import * as path from "path";
 
 async function Run() {
   const version = getInput("unity-version", { required: true });
@@ -22,20 +24,16 @@ async function Run() {
   await unityInstaller.ExecuteSetUp(version, option);
 }
 
-export async function findRubyVersion() {
-  const versions: string[] = tc.findAllVersions("Ruby");
-  console.log("Ruby");
-  console.log(versions);
+export async function findRubyVersion(version: string) {
+  const installDir: string | null = tc.find("Ruby", version);
 
-  // const installDir: string | null = tc.find("Ruby", version);
+  if (!installDir) {
+    throw new Error(`Version ${version} not found`);
+  }
 
-  // if (!installDir) {
-  //   throw new Error(`Version ${version} not found`);
-  // }
+  const toolPath: string = path.join(installDir, "bin");
 
-  // const toolPath: string = path.join(installDir, "bin");
-
-  // core.addPath(toolPath);
+  core.addPath(toolPath);
 }
 
 export async function findU3d() {
@@ -55,5 +53,5 @@ export async function findU3d() {
 
 // Run();
 
-findRubyVersion();
+findRubyVersion('2.6.2');
 findU3d();

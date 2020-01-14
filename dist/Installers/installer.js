@@ -20,6 +20,8 @@ const LinuxInstaller_1 = require("./LinuxInstaller");
 const WindowsInstaller_1 = require("./WindowsInstaller");
 const MacOSInstaller_1 = require("./MacOSInstaller");
 const tc = __importStar(require("@actions/tool-cache"));
+const core = __importStar(require("@actions/core"));
+const path = __importStar(require("path"));
 function CreateInstaller() {
     switch (process.platform) {
         case "darwin":
@@ -31,17 +33,14 @@ function CreateInstaller() {
     }
 }
 exports.CreateInstaller = CreateInstaller;
-function findRubyVersion() {
+function findRubyVersion(version) {
     return __awaiter(this, void 0, void 0, function* () {
-        const versions = tc.findAllVersions("Ruby");
-        console.log("Ruby");
-        console.log(versions);
-        // const installDir: string | null = tc.find("Ruby", version);
-        // if (!installDir) {
-        //   throw new Error(`Version ${version} not found`);
-        // }
-        // const toolPath: string = path.join(installDir, "bin");
-        // core.addPath(toolPath);
+        const installDir = tc.find("Ruby", version);
+        if (!installDir) {
+            throw new Error(`Version ${version} not found`);
+        }
+        const toolPath = path.join(installDir, "bin");
+        core.addPath(toolPath);
     });
 }
 exports.findRubyVersion = findRubyVersion;

@@ -18,20 +18,16 @@ export function CreateInstaller(): Installer {
   }
 }
 
-export async function findRubyVersion() {
-  const versions: string[] = tc.findAllVersions("Ruby");
-  console.log("Ruby");
-  console.log(versions);
+export async function findRubyVersion(version: string) {
+  const installDir: string | null = tc.find("Ruby", version);
 
-  // const installDir: string | null = tc.find("Ruby", version);
+  if (!installDir) {
+    throw new Error(`Version ${version} not found`);
+  }
 
-  // if (!installDir) {
-  //   throw new Error(`Version ${version} not found`);
-  // }
+  const toolPath: string = path.join(installDir, "bin");
 
-  // const toolPath: string = path.join(installDir, "bin");
-
-  // core.addPath(toolPath);
+  core.addPath(toolPath);
 }
 
 

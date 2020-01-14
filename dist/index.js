@@ -107,7 +107,7 @@ class Unity {
             console.log("Unityの実行");
             console.log(`args: ${this.args},`);
             console.log(`cwd: ${this.cwd},`);
-            yield exec_1.exec(`${this.u3d} -- -batchmode ${this.args}`, [], { cwd: this.cwd });
+            yield exec_1.exec(`${this.u3d} run -u ${this.version} -- -batchmode ${this.args}`, [], { cwd: this.cwd });
         });
     }
 }
@@ -138,7 +138,7 @@ class Unity {
 // }
 function install() {
     return __awaiter(this, void 0, void 0, function* () {
-        const u = new Unity("2018.3.10f1", "WebGL");
+        const u = new Unity("2018.3.10f1", "WebGL", undefined, "-quit");
         yield u.run();
         return;
         // findRubyVersion("2.6.x");

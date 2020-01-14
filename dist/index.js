@@ -43,20 +43,20 @@ function Run() {
     });
 }
 function findRubyVersion(version) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const installDir = tc.find("Ruby", version);
-        if (!installDir) {
-            throw new Error(`Version ${version} not found`);
-        }
-        const toolPath = path.join(installDir, "bin");
-        core.addPath(toolPath);
-    });
+    const installDir = tc.find("Ruby", version);
+    if (!installDir) {
+        throw new Error(`Version ${version} not found`);
+    }
+    const toolPath = path.join(installDir, "bin");
+    core.addPath(toolPath);
+    return toolPath;
 }
 exports.findRubyVersion = findRubyVersion;
 function install() {
     return __awaiter(this, void 0, void 0, function* () {
-        findRubyVersion("2.6.x");
-        yield exec_1.exec("gem install u3d");
+        const toolPath = findRubyVersion("2.6.x");
+        console.log(path.join(toolPath, "gem"));
+        yield exec_1.exec(`${path.join(toolPath, "gem")} install u3d`);
         yield exec_1.exec("u3d available");
     });
 }

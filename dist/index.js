@@ -21,7 +21,6 @@ const core_1 = require("@actions/core");
 const tc = __importStar(require("@actions/tool-cache"));
 const core = __importStar(require("@actions/core"));
 const path = __importStar(require("path"));
-const fs = __importStar(require("fs"));
 const exec_1 = require("@actions/exec");
 function Run() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -56,8 +55,7 @@ exports.findRubyVersion = findRubyVersion;
 function install() {
     return __awaiter(this, void 0, void 0, function* () {
         const toolPath = findRubyVersion("2.6.x");
-        process.env['PATH'] += ";toolPath";
-        console.log(fs.readdirSync(toolPath));
+        process.env['PATH'] += `;${toolPath}`;
         yield exec_1.exec('gem install u3d');
         yield exec_1.exec("u3d available");
     });

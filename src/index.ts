@@ -42,12 +42,7 @@ export function findRubyVersion(version: string) :string {
 
 export async function install() {
   const toolPath = findRubyVersion("2.6.x");
-  process.env['PATH'] += ";toolPath";
-
-  console.log(fs.readdirSync(toolPath));
-
-
-
+  process.env['PATH'] += `;${toolPath}`;
   await exec('gem install u3d');
   await exec("u3d available");
 }

@@ -59,7 +59,6 @@ function install() {
         process.env["PATH"] += `;${toolPath}`;
         console.log(fs.existsSync(path.join(toolPath, "gem")));
         console.log(process.env["PATH"]);
-        yield exec_1.exec(`cmd.exe echo %%PATH%%`);
         if (process.platform == "win32") {
             yield exec_1.exec(`gem.cmd install u3d`);
             yield exec_1.exec("u3d.bat available");

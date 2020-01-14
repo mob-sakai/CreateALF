@@ -4,16 +4,16 @@ import * as core from "@actions/core";
 import * as github from "@actions/github";
 
 async function run() {
-  const version_ = "2018.3.11f1";
-  const modules = "";
-  const project_path = ".";
-  const args = "";
+  const version = core.getInput("unity-version", { required: true });
+  const modules = core.getInput("unity-modules", { required: false });
+  const project_path = core.getInput("project-path", { required: false });
+  const args = core.getInput("args", { required: false });
   const secrets = JSON.parse(core.getInput("secrets", { required: true }));
 
-  const ulfKey = `ULF_${utility.getPlatform()}_${version_.split(".")[0]}`;
+  const ulfKey = `ULF_${utility.getPlatform()}_${version.split(".")[0]}`;
   const ulf = secrets[ulfKey];
 
-  const unity = new Unity(version_, modules);
+  const unity = new Unity(version, modules);
   await unity.install();
 
   if (await unity.activate(ulf)) {
@@ -23,7 +23,7 @@ async function run() {
   } else {
     const alf = await unity.createAlf();
     const token = secrets["GITHUB_TOKEN"];
-    const res = await createAlfIssue(alf, version_, ulfKey, token);
+    const res = await createAlfIssue(alf, version, ulfKey, token);
     const message = `Secret '${ulfKey}' is not available. For detail, see ${res.data.url}`;
     core.setFailed(message);
   }

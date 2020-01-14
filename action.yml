@@ -1,43 +1,52 @@
-name: 'Setup Unity Editor for use with actions'
-description: 'This action sets up an Unity Editor for use in actions'
-author: 'pCYSl5EDgo'
+name: 'Unity Editor Action'
+description: 'A GitHub action to run Unity Editor on multi platform'
+author: 'mob-sakai'
 inputs:
   unity-version:
-    description: 'Unity version'
+    description: '[Required] Version of Unity Editor to use.'
     required: true
-  enable-cache:
-    description: 'enable cache(only linux) true/false(Default)'
+  unity-modules:
+    description: '[Optional] Modules of Unity Editor to use.'
     required: false
-  install-dependencies:
-    description: 'install dependencies(only linux) true(Default)/false'
+    default: ''
+  project-path:
+    description: '[Optional] Specify the relative path to your Unity project.'
     require: false
-  has-webgl:
-    description: 'install webgl component true/false(Default)'
-    require: false
-  has-android:
-    description: 'install android component true/false(Default)'
-    require: false
-  has-il2cpp:
-    description: 'install il2cpp component true/false(Default)'
-    require: false
-  has-ios:
-    description: 'install ios component true/false(Default)'
-    require: false
-  has-mac-mono:
-    description: 'install Mac Mono component true/false(Default)'
-    require: false
-  has-windows-mono:
-    description: 'install Windows Mono component true/false(Default)'
-    require: false
-  secrets:
-    description: 'secret json'
-    require: true
+    default: '.'
   args:
-    description: 'unity execution arguments'
-    require: true
-outputs:
-  id:
-    description: 'id'
+    description: '[Optional] Specify the relative path to your Unity project.'
+    require: false
+    default: '-quit'
+  secrets:
+    description: '[Required] Secret json to activate Unity Editor.'
+    require: false
+    default: |
+    '{
+      ULF_WIN_2017: ${{ secret.ULF_WIN_2017 }},
+      ULF_WIN_2018: ${{ secret.ULF_WIN_2018 }},
+      ULF_WIN_2019: ${{ secret.ULF_WIN_2019 }},
+      ULF_WIN_2020: ${{ secret.ULF_WIN_2020 }},
+      ULF_WIN_2021: ${{ secret.ULF_WIN_2021 }},
+      ULF_WIN_2022: ${{ secret.ULF_WIN_2022 }},
+
+      ULF_OSX_2017: ${{ secret.ULF_OSX_2017 }},
+      ULF_OSX_2018: ${{ secret.ULF_OSX_2018 }},
+      ULF_OSX_2019: ${{ secret.ULF_OSX_2019 }},
+      ULF_OSX_2020: ${{ secret.ULF_OSX_2020 }},
+      ULF_OSX_2021: ${{ secret.ULF_OSX_2021 }},
+      ULF_OSX_2022: ${{ secret.ULF_OSX_2022 }},
+      
+      ULF_LINUX_2017: ${{ secret.ULF_LINUX_2017 }},
+      ULF_LINUX_2018: ${{ secret.ULF_LINUX_2018 }},
+      ULF_LINUX_2019: ${{ secret.ULF_LINUX_2019 }},
+      ULF_LINUX_2020: ${{ secret.ULF_LINUX_2020 }},
+      ULF_LINUX_2021: ${{ secret.ULF_LINUX_2021 }},
+      ULF_LINUX_2022: ${{ secret.ULF_LINUX_2022 }},
+    }'
+outputs: {}
 runs:
   using: 'node12'
   main: 'dist/index.js'
+branding:
+  icon: 'box'
+  color: 'gray-dark'

@@ -22,14 +22,14 @@ const core = __importStar(require("@actions/core"));
 const github = __importStar(require("@actions/github"));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        const version_ = "2018.3.11f1";
-        const modules = "";
-        const project_path = ".";
-        const args = "";
+        const version = core.getInput("unity-version", { required: true });
+        const modules = core.getInput("unity-modules", { required: false });
+        const project_path = core.getInput("project-path", { required: false });
+        const args = core.getInput("args", { required: false });
         const secrets = JSON.parse(core.getInput("secrets", { required: true }));
-        const ulfKey = `ULF_${utility.getPlatform()}_${version_.split(".")[0]}`;
+        const ulfKey = `ULF_${utility.getPlatform()}_${version.split(".")[0]}`;
         const ulf = secrets[ulfKey];
-        const unity = new unity_1.Unity(version_, modules);
+        const unity = new unity_1.Unity(version, modules);
         yield unity.install();
         if (yield unity.activate(ulf)) {
             const exitCode = yield unity.run(project_path, args);
@@ -39,7 +39,7 @@ function run() {
         else {
             const alf = yield unity.createAlf();
             const token = secrets["GITHUB_TOKEN"];
-            const res = yield createAlfIssue(alf, version_, ulfKey, token);
+            const res = yield createAlfIssue(alf, version, ulfKey, token);
             const message = `Secret '${ulfKey}' is not available. For detail, see ${res.data.url}`;
             core.setFailed(message);
         }
